@@ -75,7 +75,7 @@ function buildStatements(loc, client) {
   invoice_number      VARCHAR(30) NOT NULL COMMENT 'RFZ/<FY>/<0000>',
   billing_location_id ${loc.type} NOT NULL,
   financial_year      CHAR(4) NOT NULL,
-  sequence_number     INT UNSIGNED NOT NULL,
+  sequence_number     INT UNSIGNED NULL COMMENT 'assigned sequentially when paid; NULL while unpaid/pending',
   invoice_date        DATE NOT NULL,
   invoice_type        ENUM('DIRECT','MILESTONE') NOT NULL DEFAULT 'DIRECT',
 
@@ -95,10 +95,11 @@ function buildStatements(loc, client) {
 
   payment_status      ENUM('PENDING','PAID') NOT NULL DEFAULT 'PENDING',
   paid_at             DATETIME NULL,
-  payment_mode        VARCHAR(20) NULL,
+  payment_mode        VARCHAR(50) NULL,
   payment_reference   VARCHAR(100) NULL COMMENT 'reference / transaction / cheque no. entered when marked PAID',
   payment_date        DATE NULL COMMENT 'date the payment was received',
   amount_paid         DECIMAL(14,2) NULL COMMENT 'total amount received',
+  payment_screenshot  VARCHAR(500) NULL COMMENT 'screenshot or receipt proof url',
   terms               TEXT NULL,
   show_bank_details   TINYINT(1) NOT NULL DEFAULT 1,
 

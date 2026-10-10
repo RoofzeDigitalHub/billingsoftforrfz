@@ -40,4 +40,11 @@ router.use('/proposals', proposalRoutes);
 // Terms & Conditions templates (plain CRUD - columns are read live from the table)
 router.use('/terms-master', createCrudRouter('terms_master'));
 
+// Authentication routes (Passwordless Email OTP Login)
+const authRoutes = require('./authRoutes');
+router.use('/auth', authRoutes);
+
+// Admin users management
+router.use('/admin-users', createCrudRouter('admin_users'));
+
 module.exports = router;

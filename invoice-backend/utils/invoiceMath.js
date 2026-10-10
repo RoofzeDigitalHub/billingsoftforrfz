@@ -65,12 +65,19 @@ function normaliseMilestones(rawMilestones, itemLabel, totalForItem) {
     if (percent > 100) throw new HttpError(400, `${itemLabel}, Milestone ${i + 1}: % cannot exceed 100.`);
     return {
       milestone_no: i + 1,
-      label: `Milestone ${i + 1}`,
+      label: m.label || `Milestone ${i + 1}`,
       percent,
       amount: round2((totalForItem * percent) / 100),
       is_billed: !!m.billed,
+      already_billed: !!m.already_billed,
     };
   });
+
+  for (const m of milestones) {
+    if (m.is_billed && m.already_billed) {
+      throw new HttpError(400, `${itemLabel}, ${m.label}: cannot be marked "Billing now" because it is already billed.`);
+    }
+  }
 
   const sum = round2(milestones.reduce((s, m) => s + m.percent, 0));
   if (Math.abs(sum - 100) > 0.01) {
