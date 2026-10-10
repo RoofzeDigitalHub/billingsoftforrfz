@@ -6,21 +6,38 @@
 require('dotenv').config();
 const nodemailer = require('nodemailer');
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.SMTP_PORT || '465', 10),
-  secure: process.env.SMTP_SECURE === 'true' || process.env.SMTP_PORT === '465',
-  auth: {
-    user: process.env.SMTP_USER || 'roofzedigitalhub@gmail.com',
-    pass: (process.env.SMTP_PASS || 'agpkyrlnrbxfycfo').replace(/\s+/g, ''),
-  },
-});
+// Create a transporter function with specified port/security
+function createSmtpTransporter(customPort, customSecure) {
+  const host = process.env.SMTP_HOST || 'roofze.com';
+  const port = customPort || parseInt(process.env.SMTP_PORT || '587', 10);
+  const secure = customSecure !== undefined ? customSecure : (port === 465);
+
+  return nodemailer.createTransport({
+    host,
+    port,
+    secure, // true for 465, false for 587
+    auth: {
+      user: process.env.SMTP_USER || 'jay@roofze.com',
+      pass: process.env.SMTP_PASS || '5pd6n#Q94',
+    },
+    connectionTimeout: 10000, // 10 seconds timeout
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
+    tls: {
+      rejectUnauthorized: false,
+    },
+  });
+}
+
+let transporter = createSmtpTransporter();
 
 /**
  * Sends a branded OTP verification email to the recipient.
+ * If the primary SMTP port (e.g. 587 or 465) fails,
+ * it automatically attempts fallback to the alternative port (465 / 587).
  */
 async function sendOtpEmail({ toEmail, otpCode, userName = 'Admin' }) {
-  const fromAddress = process.env.SMTP_FROM || 'Roofze Digital Hub <roofzedigitalhub@gmail.com>';
+  const fromAddress = process.env.SMTP_FROM || 'Roofze Digital Hub <jay@roofze.com>';
 
   const htmlContent = `
 <!DOCTYPE html>
@@ -101,15 +118,37 @@ async function sendOtpEmail({ toEmail, otpCode, userName = 'Admin' }) {
 </html>
   `;
 
-  const info = await transporter.sendMail({
+  const mailOptions = {
     from: fromAddress,
     to: toEmail,
     subject: `🔐 ${otpCode} is your Roofze Admin Login Code`,
     text: `Your Roofze Admin Login OTP is: ${otpCode}. Valid for 10 minutes. Do not share this code.`,
     html: htmlContent,
-  });
+  };
 
-  return { success: true, messageId: info.messageId };
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    return { success: true, messageId: info.messageId };
+  } catch (primaryError) {
+    console.warn(`[SMTP] Primary attempt failed (${primaryError.message}). Attempting fallback on alternative port...`);
+
+    // Determine alternative port (switch between 587 and 465)
+    const currentPort = parseInt(process.env.SMTP_PORT || '587', 10);
+    const fallbackPort = currentPort === 465 ? 587 : 465;
+    const fallbackSecure = fallbackPort === 465;
+
+    try {
+      const fallbackTransporter = createSmtpTransporter(fallbackPort, fallbackSecure);
+      const fallbackInfo = await fallbackTransporter.sendMail(mailOptions);
+      console.log(`[SMTP] Fallback succeeded on port ${fallbackPort}!`);
+      // Update default transporter to the working one
+      transporter = fallbackTransporter;
+      return { success: true, messageId: fallbackInfo.messageId };
+    } catch (fallbackError) {
+      console.error('[SMTP] Both primary and fallback attempts failed.');
+      throw new Error(`Primary port ${currentPort}: ${primaryError.message} | Fallback port ${fallbackPort}: ${fallbackError.message}`);
+    }
+  }
 }
 
 /**

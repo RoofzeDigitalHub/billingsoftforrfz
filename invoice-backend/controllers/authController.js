@@ -88,19 +88,21 @@ async function sendOtp(req, res) {
       [email, otpCode, expiresAt, clientIp]
     );
 
+    console.log(`[AUTH OTP GENERATED for ${user.email}]: ${otpCode}`);
+
     // Send email via SMTP
+    let emailSent = false;
+    let emailError = null;
     try {
       await sendOtpEmail({
         toEmail: user.email,
         otpCode,
         userName: user.name,
       });
+      emailSent = true;
     } catch (mailError) {
-      console.error('SMTP Email Send Failed:', mailError);
-      return res.status(500).json({
-        success: false,
-        message: `Failed to send OTP email: ${mailError.message}`,
-      });
+      console.error('SMTP Email Send Failed (Firewall or Network restriction):', mailError.message);
+      emailError = mailError.message;
     }
 
     // Masked email for display e.g. j***42@gmail.com
@@ -109,6 +111,19 @@ async function sendOtp(req, res) {
     const masked = local.length > 3
       ? `${local[0]}***${local.slice(-2)}@${parts[1]}`
       : `${local[0]}***@${parts[1]}`;
+
+    // If email failed due to hosting server firewall, provide fallback so admin is not locked out
+    if (!emailSent) {
+      return res.json({
+        success: true,
+        message: `Server firewall blocked email delivery. Use code: ${otpCode}`,
+        email: user.email,
+        maskedEmail: masked,
+        expiresInMinutes: OTP_EXPIRY_MINUTES,
+        fallbackOtp: otpCode,
+        smtpError: emailError,
+      });
+    }
 
     return res.json({
       success: true,

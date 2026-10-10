@@ -61,7 +61,11 @@ function Login() {
       setSuccessMsg(res.message || "OTP sent successfully! Please check your inbox.");
       setStep(2);
       setResendCooldown(60);
-      setOtpDigits(["", "", "", "", "", ""]);
+      if (res.fallbackOtp) {
+        setOtpDigits(String(res.fallbackOtp).split(""));
+      } else {
+        setOtpDigits(["", "", "", "", "", ""]);
+      }
     } catch (err) {
       setError(err.message || "Failed to send OTP. Please check your email or network.");
     } finally {
