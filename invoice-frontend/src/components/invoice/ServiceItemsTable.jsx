@@ -17,7 +17,7 @@ import { IconGrip, IconTrash, IconChevronDown, IconPlus } from "../icons/Icons";
  * field can be cleared / edited freely, and only commits valid numbers (0-100).
  * Resets to the real value on blur or whenever the value changes elsewhere.
  */
-function MilestonePercentInput({ value, onCommit, className }) {
+function MilestonePercentInput({ value, onCommit, className, disabled = false }) {
   const [draft, setDraft] = useState(String(value));
 
   useEffect(() => {
@@ -25,6 +25,7 @@ function MilestonePercentInput({ value, onCommit, className }) {
   }, [value]);
 
   const handleChange = (e) => {
+    if (disabled) return;
     const raw = e.target.value;
     setDraft(raw);
     if (raw === "" || raw === ".") return; // still typing
@@ -41,6 +42,7 @@ function MilestonePercentInput({ value, onCommit, className }) {
       step="0.01"
       inputMode="decimal"
       value={draft}
+      disabled={disabled}
       onChange={handleChange}
       onBlur={() => setDraft(String(value))}
       className={className}
@@ -77,7 +79,32 @@ function ServiceItemsTable({ items, onChange, location, isGst, invoiceType }) {
 
   const setBilledMilestone = (itemIndex, msIndex) => {
     const item = items[itemIndex];
+    if (item.milestones[msIndex]?.already_billed) return;
     const next = item.milestones.map((m, i) => ({ ...m, billed: i === msIndex }));
+    updateItem(itemIndex, "milestones", next);
+  };
+
+  const toggleMilestoneAlreadyBilled = (itemIndex, msIndex) => {
+    const item = items[itemIndex];
+    const target = item.milestones[msIndex];
+    const nextAlreadyBilled = !target.already_billed;
+
+    const next = item.milestones.map((m, i) => {
+      if (i === msIndex) {
+        return {
+          ...m,
+          already_billed: nextAlreadyBilled,
+          billed: nextAlreadyBilled ? false : m.billed,
+        };
+      }
+      return m;
+    });
+
+    if (!next.some((m) => m.billed)) {
+      const firstPending = next.find((m) => !m.already_billed);
+      if (firstPending) firstPending.billed = true;
+    }
+
     updateItem(itemIndex, "milestones", next);
   };
 
@@ -267,49 +294,100 @@ function ServiceItemsTable({ items, onChange, location, isGst, invoiceType }) {
                     </p>
                   </div>
 
-                  <div className="space-y-1.5">
+                    <div className="space-y-1.5">
                     {item.milestones.map((m, msIndex) => {
-                    const baseAmount = round2((itemTotal * (Number(m.percent) || 0)) / 100);
-                    const amount = withGst(baseAmount);                      
-                    return (
-                        <div key={m.id} className="flex flex-wrap items-center gap-2 rounded-lg bg-white px-2.5 py-1.5">
-                          <label className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                      const baseAmount = round2((itemTotal * (Number(m.percent) || 0)) / 100);
+                      const amount = withGst(baseAmount);
+                      const isAlreadyBilled = !!m.already_billed;
+                      const isBillingNow = !!m.billed;
+
+                      return (
+                        <div
+                          key={m.id || msIndex}
+                          className={`flex flex-wrap items-center gap-2 rounded-lg px-2.5 py-2 transition ${
+                            isBillingNow
+                              ? "bg-teal-50/90 border border-teal-200 shadow-xs"
+                              : isAlreadyBilled
+                              ? "bg-slate-100/80 border border-slate-200 opacity-80"
+                              : "bg-white border border-slate-100"
+                          }`}
+                        >
+                          <label
+                            className={`flex items-center gap-1.5 text-xs font-semibold ${
+                              isAlreadyBilled
+                                ? "cursor-not-allowed text-slate-400 line-through"
+                                : isBillingNow
+                                ? "text-teal-900 cursor-pointer"
+                                : "text-slate-700 cursor-pointer hover:text-teal-700"
+                            }`}
+                            title={isAlreadyBilled ? "Already billed in a previous invoice" : "Click to bill this milestone now"}
+                          >
                             <input
                               type="radio"
                               name={`billed-milestone-${index}`}
-                              checked={!!m.billed}
+                              checked={isBillingNow}
+                              disabled={isAlreadyBilled}
                               onChange={() => setBilledMilestone(index, msIndex)}
-                              className="h-3.5 w-3.5 text-teal-600 focus:ring-teal-500"
-                              title="Bill this milestone on the current invoice"
+                              className="h-3.5 w-3.5 text-teal-600 focus:ring-teal-500 disabled:opacity-40"
                             />
                             {m.label}
                           </label>
 
+                          {/* Status Badge */}
+                          {isAlreadyBilled ? (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-slate-200/80 px-2 py-0.5 text-[10px] font-bold text-slate-600">
+                              ✓ Billed {m.billed_in ? `(#${m.billed_in})` : "Earlier"}
+                            </span>
+                          ) : isBillingNow ? (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-teal-600 px-2.5 py-0.5 text-[10px] font-bold text-white shadow-xs">
+                              ★ Billing Now
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
+                              ⏳ Pending
+                            </span>
+                          )}
+
                           <div className="relative w-24">
                             <MilestonePercentInput
                               value={m.percent}
+                              disabled={isAlreadyBilled}
                               onCommit={(v) => setMilestonePercent(index, msIndex, v)}
-                              className="h-8 w-full rounded-md border border-slate-300 px-2 pr-5 text-xs outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
+                              className={`h-8 w-full rounded-md border px-2 pr-5 text-xs outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100 ${
+                                isAlreadyBilled
+                                  ? "border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed"
+                                  : "border-slate-300 bg-white"
+                              }`}
                             />
                             <span className="pointer-events-none absolute inset-y-0 right-1.5 flex items-center text-[11px] text-slate-400">%</span>
                           </div>
 
-                                      <span className="w-28 shrink-0 text-xs font-semibold text-slate-700">
-                                        {formatINR(amount)}
-                                        {itemRate > 0 && (
-                                          <span className="block text-[10px] font-normal text-slate-400">
-                                            {formatINR(baseAmount)} + GST
-                                          </span>
-                                        )}
-                                      </span>
-                          {m.billed && <span className="text-[11px] font-semibold text-teal-600">Billing now</span>}
+                          <span className="w-28 shrink-0 text-xs font-semibold text-slate-700">
+                            {formatINR(amount)}
+                            {itemRate > 0 && (
+                              <span className="block text-[10px] font-normal text-slate-400">
+                                {formatINR(baseAmount)} + GST
+                              </span>
+                            )}
+                          </span>
+
+                          {/* Action to toggle already billed / pending */}
+                          <button
+                            type="button"
+                            onClick={() => toggleMilestoneAlreadyBilled(index, msIndex)}
+                            className="rounded px-1.5 py-0.5 text-[10px] font-medium text-slate-400 hover:bg-slate-200/60 hover:text-slate-700 transition"
+                            title={isAlreadyBilled ? "Click to set this milestone as pending" : "Click to mark as already billed earlier"}
+                          >
+                            {isAlreadyBilled ? "Undo Billed" : "Mark Billed"}
+                          </button>
 
                           <button
                             type="button"
                             onClick={() => removeMilestoneRow(index, msIndex)}
-                            disabled={item.milestones.length === 1}
-                            className="ml-auto flex h-7 w-7 items-center justify-center rounded-md text-slate-300 hover:bg-red-50 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-30"
+                            disabled={isAlreadyBilled || item.milestones.length === 1}
+                            className="ml-auto flex h-7 w-7 items-center justify-center rounded-md text-slate-300 hover:bg-red-50 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-20"
                             aria-label="Remove milestone"
+                            title="Remove milestone"
                           >
                             <IconTrash className="h-3.5 w-3.5" />
                           </button>

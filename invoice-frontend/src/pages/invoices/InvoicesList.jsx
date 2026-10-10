@@ -231,7 +231,16 @@ function InvoicesList() {
               <tbody>
                 {filtered.map((inv) => (
                   <tr key={inv.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50">
-                    <td className="px-5 py-3 font-semibold">{inv.invoice_number}</td>
+                    <td className="px-5 py-3 font-semibold">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-slate-900">{inv.invoice_number}</span>
+                        {inv.payment_status !== "PAID" && String(inv.invoice_number || "").startsWith("TMP-") && (
+                          <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-800">
+                            Temp
+                          </span>
+                        )}
+                      </div>
+                    </td>
                     <td className="px-5 py-3 text-slate-500">
                       {new Date(inv.invoice_date).toLocaleDateString("en-IN", {
                         day: "2-digit",

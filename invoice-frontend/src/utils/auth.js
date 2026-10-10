@@ -1,39 +1,34 @@
-// ---------------------------------------------------------------------------
-// Frontend-only auth. No server yet — credentials + session both live in
-// localStorage. Swap this file's internals for real API calls later; the
-// function signatures (login/logout/getSession/isAuthenticated) can stay.
-// ---------------------------------------------------------------------------
+// src/utils/auth.js
+//
+// Real Backend-Connected Authentication Manager with JWT & Email OTP.
 
-const USERS_KEY = "rfz_users";
 const SESSION_KEY = "rfz_session";
+const TOKEN_KEY = "rfz_token";
 
-function seedDefaultUser() {
-  if (!localStorage.getItem(USERS_KEY)) {
+/**
+ * Saves authenticated session and token into localStorage
+ */
+export function setSession({ token, user }) {
+  if (token) {
+    localStorage.setItem(TOKEN_KEY, token);
+  }
+  if (user) {
     localStorage.setItem(
-      USERS_KEY,
-      JSON.stringify([{ username: "admin", password: "admin123", name: "Admin", role: "Administrator" }])
+      SESSION_KEY,
+      JSON.stringify({
+        id: user.id,
+        email: user.email,
+        name: user.name || user.email.split("@")[0],
+        role: user.role || "Admin",
+        loginAt: Date.now(),
+      })
     );
   }
 }
-seedDefaultUser();
 
-export function login(username, password) {
-  const users = JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
-  const user = users.find(
-    (u) => u.username.toLowerCase() === username.trim().toLowerCase() && u.password === password
-  );
-  if (!user) return false;
-  localStorage.setItem(
-    SESSION_KEY,
-    JSON.stringify({ username: user.username, name: user.name, role: user.role, loginAt: Date.now() })
-  );
-  return true;
-}
-
-export function logout() {
-  localStorage.removeItem(SESSION_KEY);
-}
-
+/**
+ * Retrieves the currently logged-in user profile
+ */
 export function getSession() {
   try {
     const raw = localStorage.getItem(SESSION_KEY);
@@ -43,6 +38,24 @@ export function getSession() {
   }
 }
 
+/**
+ * Retrieves JWT Bearer token
+ */
+export function getToken() {
+  return localStorage.getItem(TOKEN_KEY) || null;
+}
+
+/**
+ * Checks whether user is logged in
+ */
 export function isAuthenticated() {
-  return !!getSession();
+  return Boolean(getToken() && getSession());
+}
+
+/**
+ * Logs out and clears session & token
+ */
+export function logout() {
+  localStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem(TOKEN_KEY);
 }

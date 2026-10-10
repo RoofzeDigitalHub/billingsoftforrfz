@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { PAYMENT_MODE_OPTIONS } from "../../data/invoiceFormOptions";
 
@@ -17,9 +17,9 @@ const inputClass = (hasError) =>
   }`;
 
 /**
- * Popup shown when an invoice is marked as Paid. All four fields are required.
- * onSubmit receives { payment_mode, payment_reference, payment_date, amount_paid }
- * and may return a promise (the modal stays open until it resolves).
+ * Popup shown when an invoice is marked as Paid.
+ * Allows entering Payment Mode, Ref ID, Payment Date, Total Amount, and Payment Screenshot.
+ * Generates the official sequential invoice number upon submission.
  */
 function MarkPaidModal({ open, invoiceNumber, totalAmount, submitting, serverError, onSubmit, onClose }) {
   const [form, setForm] = useState({
@@ -27,8 +27,12 @@ function MarkPaidModal({ open, invoiceNumber, totalAmount, submitting, serverErr
     payment_reference: "",
     payment_date: todayISO(),
     amount_paid: "",
+    payment_screenshot: "",
   });
+  const [screenshotPreview, setScreenshotPreview] = useState("");
+  const [screenshotName, setScreenshotName] = useState("");
   const [errors, setErrors] = useState({});
+  const fileInputRef = useRef(null);
 
   // Fresh form every time the popup opens; amount defaults to the invoice total.
   useEffect(() => {
@@ -38,7 +42,10 @@ function MarkPaidModal({ open, invoiceNumber, totalAmount, submitting, serverErr
       payment_reference: "",
       payment_date: todayISO(),
       amount_paid: totalAmount ? String(totalAmount) : "",
+      payment_screenshot: "",
     });
+    setScreenshotPreview("");
+    setScreenshotName("");
     setErrors({});
   }, [open, totalAmount]);
 
@@ -56,6 +63,39 @@ function MarkPaidModal({ open, invoiceNumber, totalAmount, submitting, serverErr
   const setField = (name, value) => {
     setForm((f) => ({ ...f, [name]: value }));
     if (errors[name]) setErrors((e) => ({ ...e, [name]: "" }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setErrors((prev) => ({ ...prev, payment_screenshot: "Please select an image file (PNG, JPG, WEBP)." }));
+      return;
+    }
+
+    if (file.size > 15 * 1024 * 1024) {
+      setErrors((prev) => ({ ...prev, payment_screenshot: "Image size must be under 15MB." }));
+      return;
+    }
+
+    setScreenshotName(file.name);
+    setErrors((prev) => ({ ...prev, payment_screenshot: "" }));
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result;
+      setScreenshotPreview(dataUrl);
+      setField("payment_screenshot", dataUrl);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveScreenshot = () => {
+    setScreenshotPreview("");
+    setScreenshotName("");
+    setField("payment_screenshot", "");
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const validate = () => {
@@ -78,6 +118,7 @@ function MarkPaidModal({ open, invoiceNumber, totalAmount, submitting, serverErr
       payment_reference: form.payment_reference.trim(),
       payment_date: form.payment_date,
       amount_paid: Number(form.amount_paid),
+      payment_screenshot: form.payment_screenshot || null,
     });
   };
 
@@ -85,9 +126,11 @@ function MarkPaidModal({ open, invoiceNumber, totalAmount, submitting, serverErr
   const errorText = (name) =>
     errors[name] ? <p className="mt-1 text-xs font-medium text-red-500">{errors[name]}</p> : null;
 
+  const isTempNumber = invoiceNumber && invoiceNumber.startsWith("TMP-");
+
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 print:hidden"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 print:hidden overflow-y-auto"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget && !submitting) onClose();
       }}
@@ -98,16 +141,39 @@ function MarkPaidModal({ open, invoiceNumber, totalAmount, submitting, serverErr
       <form
         onSubmit={handleSubmit}
         noValidate
-        className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
+        className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl my-8"
       >
-        <div className="mb-5">
-          <h2 id="mark-paid-title" className="text-lg font-bold text-slate-900">
-            Mark as Paid
-          </h2>
-          <p className="mt-0.5 text-xs text-slate-500">
-            Enter the payment details{invoiceNumber ? ` for ${invoiceNumber}` : ""}. All fields are required.
+        <div className="mb-4">
+          <div className="flex items-center justify-between">
+            <h2 id="mark-paid-title" className="text-lg font-bold text-slate-900">
+              Mark as Paid &amp; Generate Invoice No.
+            </h2>
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={submitting}
+              className="text-slate-400 hover:text-slate-600 text-lg leading-none"
+            >
+              &times;
+            </button>
+          </div>
+          <p className="mt-1 text-xs text-slate-500">
+            Enter payment confirmation details{invoiceNumber ? ` for ${invoiceNumber}` : ""}.
           </p>
         </div>
+
+        {/* Notice about invoice number generation */}
+        {isTempNumber && (
+          <div className="mb-4 rounded-xl border border-teal-200 bg-teal-50/70 p-3 text-xs text-teal-800">
+            <div className="flex items-start gap-2">
+              <span className="font-bold text-teal-600">⚡ Invoice Number:</span>
+              <div>
+                This invoice currently has temporary number <strong>{invoiceNumber}</strong>. Upon confirming payment,
+                the official sequential invoice number will be generated automatically.
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-4">
           <div>
@@ -132,7 +198,7 @@ function MarkPaidModal({ open, invoiceNumber, totalAmount, submitting, serverErr
 
           <div>
             <label htmlFor="pay-ref" className={labelClass}>
-              Reference ID <span className="text-red-500">*</span>
+              Reference ID / Transaction ID <span className="text-red-500">*</span>
             </label>
             <input
               id="pay-ref"
@@ -140,7 +206,7 @@ function MarkPaidModal({ open, invoiceNumber, totalAmount, submitting, serverErr
               maxLength={100}
               value={form.payment_reference}
               onChange={(e) => setField("payment_reference", e.target.value)}
-              placeholder="Transaction / UTR / cheque number"
+              placeholder="e.g. UTR / IMPS / UPI ref / cheque number"
               className={inputClass(errors.payment_reference)}
             />
             {errorText("payment_reference")}
@@ -179,6 +245,68 @@ function MarkPaidModal({ open, invoiceNumber, totalAmount, submitting, serverErr
               {errorText("amount_paid")}
             </div>
           </div>
+
+          {/* Payment Screenshot Upload */}
+          <div>
+            <label className={labelClass}>
+              Payment Screenshot / Receipt Proof
+            </label>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+              id="pay-screenshot-file"
+            />
+
+            {!screenshotPreview ? (
+              <label
+                htmlFor="pay-screenshot-file"
+                className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 p-4 text-center cursor-pointer transition hover:border-teal-500 hover:bg-slate-50"
+              >
+                <svg
+                  className="h-8 w-8 text-slate-400 mb-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
+                </svg>
+                <span className="text-xs font-semibold text-teal-700">
+                  Click to upload payment screenshot
+                </span>
+                <span className="text-[11px] text-slate-400 mt-0.5">
+                  PNG, JPG, JPEG or WEBP (Max 15MB)
+                </span>
+              </label>
+            ) : (
+              <div className="relative rounded-xl border border-slate-200 bg-slate-50 p-2 flex items-center gap-3">
+                <img
+                  src={screenshotPreview}
+                  alt="Payment screenshot preview"
+                  className="h-16 w-16 object-cover rounded-lg border border-slate-200 shrink-0"
+                />
+                <div className="min-w-0 flex-1 text-xs">
+                  <div className="font-semibold text-slate-800 truncate">{screenshotName || "Payment Screenshot"}</div>
+                  <div className="text-[11px] text-teal-600 font-medium">Ready to upload</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleRemoveScreenshot}
+                  className="rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-100"
+                >
+                  Remove
+                </button>
+              </div>
+            )}
+            {errorText("payment_screenshot")}
+          </div>
         </div>
 
         {serverError && (
@@ -199,9 +327,9 @@ function MarkPaidModal({ open, invoiceNumber, totalAmount, submitting, serverErr
           <button
             type="submit"
             disabled={submitting}
-            className="rounded-xl bg-teal-600 px-4 py-2 text-xs font-semibold text-white hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-xl bg-teal-600 px-5 py-2 text-xs font-semibold text-white hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-60 shadow-sm"
           >
-            {submitting ? "Saving…" : "Confirm Payment"}
+            {submitting ? "Processing…" : "Confirm Payment & Generate Invoice No."}
           </button>
         </div>
       </form>
@@ -210,3 +338,4 @@ function MarkPaidModal({ open, invoiceNumber, totalAmount, submitting, serverErr
 }
 
 export default MarkPaidModal;
+

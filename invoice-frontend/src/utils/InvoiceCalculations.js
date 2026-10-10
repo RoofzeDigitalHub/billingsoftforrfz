@@ -213,8 +213,11 @@ function normalizeMilestones(list) {
   // a lone milestone always holds the full 100%
   if (next.length === 1) next = [{ ...next[0], percent: 100, locked: false }];
 
-  next = next.map((m, i) => ({ ...m, label: `Milestone ${i + 1}` }));
-  if (!next.some((m) => m.billed)) next[0] = { ...next[0], billed: true };
+  next = next.map((m, i) => ({ ...m, label: m.label || `Milestone ${i + 1}` }));
+  if (!next.some((m) => m.billed)) {
+    const firstAvailable = next.find((m) => !m.already_billed) || next[0];
+    if (firstAvailable) firstAvailable.billed = true;
+  }
   // guard against more than one billed flag
   const firstBilled = next.findIndex((m) => m.billed);
   return next.map((m, i) => ({ ...m, billed: i === firstBilled }));

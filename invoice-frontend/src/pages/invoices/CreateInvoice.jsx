@@ -12,7 +12,7 @@ import { IconCalendar, IconChevronDown, IconCopy, IconEye, IconSave } from "../.
 
 import { useBillingLocations } from "../../api/billingLocations";
 import { getClients } from "../../api/clients";
-import { createInvoice, getNextInvoiceNumber } from "../../api/invoices";
+import { createInvoice, getNextInvoiceNumber, getClientMilestones } from "../../api/invoices";
 import { INDIAN_STATES, INVOICE_TYPES, TERMS_PRESETS, PAYMENT_METHOD_OPTIONS } from "../../data/invoiceFormOptions";
 import {
   getFinancialYear,
@@ -184,15 +184,84 @@ function CreateInvoice() {
     if (preset && preset.value !== "CUSTOM") setTermsText(preset.text);
   };
 
+  // Previous milestone projects for the selected client (to continue billing pending milestones)
+  const [clientMilestonesLoading, setClientMilestonesLoading] = useState(false);
+  const [previousMilestoneProjects, setPreviousMilestoneProjects] = useState([]);
+  const [selectedMilestoneProject, setSelectedMilestoneProject] = useState("");
+
+  useEffect(() => {
+    if (invoiceType !== "MILESTONE" || (!clientId && !clientName.trim())) {
+      setPreviousMilestoneProjects([]);
+      setSelectedMilestoneProject("");
+      return;
+    }
+
+    let cancelled = false;
+    setClientMilestonesLoading(true);
+    getClientMilestones({ clientId, clientName: clientName.trim() })
+      .then((res) => {
+        if (!cancelled) {
+          const list = Array.isArray(res) ? res : res?.data || [];
+          setPreviousMilestoneProjects(list);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load client milestone projects:", err);
+        if (!cancelled) setPreviousMilestoneProjects([]);
+      })
+      .finally(() => {
+        if (!cancelled) setClientMilestonesLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [clientId, clientName, invoiceType]);
+
+  const handleSelectMilestoneProject = (projectTitle) => {
+    setSelectedMilestoneProject(projectTitle);
+    if (!projectTitle) return;
+
+    const proj = previousMilestoneProjects.find((p) => p.project_title === projectTitle);
+    if (!proj) return;
+
+    // Find the first milestone that was not previously billed
+    const firstPendingIdx = proj.milestones.findIndex((m) => !m.is_billed_previously);
+
+    const mappedMilestones = proj.milestones.map((m, idx) => ({
+      id: `ms_${m.sequence}_${idx}`,
+      sequence: m.sequence,
+      label: m.label || `Milestone ${idx + 1}`,
+      percent: Number(m.percent) || 0,
+      locked: true,
+      already_billed: !!m.is_billed_previously,
+      billed_in: m.billed_in || null,
+      billed: idx === (firstPendingIdx !== -1 ? firstPendingIdx : 0),
+    }));
+
+    setItems([
+      {
+        service_description: proj.project_title,
+        qty: proj.qty || 1,
+        total_price: proj.total_price,
+        price_percentage: 100,
+        tax_rate: proj.tax_rate ?? (selectedLocation?.default_gst_percentage || 18),
+        milestones: mappedMilestones,
+        isFromPreviousProject: true,
+      },
+    ]);
+  };
+
   const financialYear = useMemo(() => getFinancialYear(invoiceDate), [invoiceDate]);
 
-  // The next invoice number comes from the database (per location + financial
-  // year). This is only a preview — the number is actually reserved when the
-  // invoice is saved.
+  // Unpaid invoices receive a temporary random number (e.g. TMP-492018).
+  // The official sequential invoice number is generated when the invoice is marked PAID.
   const [nextNumber, setNextNumber] = useState(null); // null = loading
+  const [officialNextNumber, setOfficialNextNumber] = useState(null);
   useEffect(() => {
     if (!selectedLocation) {
       setNextNumber(null);
+      setOfficialNextNumber(null);
       return undefined;
     }
     let cancelled = false;
@@ -203,16 +272,27 @@ function CreateInvoice() {
       locationType: selectedLocation.location_type,
     })
       .then((data) => {
-        if (!cancelled) setNextNumber(data.invoice_number);
+        if (!cancelled) {
+          setNextNumber(data.temp_number || data.invoice_number);
+          setOfficialNextNumber(data.official_next_number);
+        }
       })
       .catch(() => {
-        if (!cancelled) setNextNumber("Unavailable");
+        if (!cancelled) {
+          const rand = Math.floor(100000 + Math.random() * 900000);
+          setNextNumber(`TMP-${rand}`);
+        }
       });
     return () => {
       cancelled = true;
     };
   }, [selectedLocation, invoiceDate]);
   const nextNumberPreview = selectedLocation ? nextNumber ?? "…" : "—";
+
+  const handleRollNumber = () => {
+    const rand = Math.floor(100000 + Math.random() * 900000);
+    setNextNumber(`TMP-${rand}`);
+  };
 
   const summary = useMemo(() => calculateInvoiceSummaryV2(items, selectedLocation), [items, selectedLocation]);
 
@@ -247,6 +327,7 @@ function CreateInvoice() {
         return {
           id: idx,
           service_description: item.service_description,
+          qty: item.qty === "" || item.qty == null ? 1 : Number(item.qty),
           total_price: Number(item.total_price) || 0,
           price_percentage: item.milestones?.length
             ? billedPercentFromMilestones(item.milestones)
@@ -307,9 +388,15 @@ function CreateInvoice() {
           tax_rate: item.tax_rate,
           milestones:
             invoiceType === "MILESTONE"
-              ? (item.milestones || []).map((m) => ({ percent: Number(m.percent) || 0, billed: !!m.billed }))
+              ? (item.milestones || []).map((m) => ({
+                  percent: Number(m.percent) || 0,
+                  billed: !!m.billed,
+                  already_billed: !!m.already_billed,
+                  label: m.label,
+                }))
               : undefined,
         })),
+        invoice_number: nextNumberPreview && nextNumberPreview !== "—" && nextNumberPreview !== "…" ? nextNumberPreview : undefined,
         payment_status: "PENDING",
         payment_mode: paymentMethod,
         terms: termsText,
@@ -381,17 +468,31 @@ function CreateInvoice() {
               </div>
 
               <div>
-                <label className={labelClass}>Invoice No.</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-semibold text-slate-600">Invoice No.</label>
+                  <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-800">
+                    Temp / Unpaid
+                  </span>
+                </div>
                 <div className="flex h-10 items-stretch gap-2">
                   <div
                     className={`flex flex-1 items-center truncate rounded-lg border px-3 text-sm font-semibold ${
                       selectedLocation
-                        ? "border-slate-300 bg-slate-50 text-slate-600"
+                        ? "border-slate-300 bg-slate-50 text-slate-700"
                         : "border-dashed border-slate-300 bg-slate-50 text-slate-400"
                     }`}
                   >
                     {selectedLocation ? nextNumberPreview : "—"}
                   </div>
+                  <button
+                    type="button"
+                    onClick={handleRollNumber}
+                    disabled={!selectedLocation}
+                    className="flex w-10 shrink-0 items-center justify-center rounded-lg border border-slate-300 text-slate-500 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                    title="Generate new random number"
+                  >
+                    🎲
+                  </button>
                   <button
                     type="button"
                     onClick={handleCopyNumber}
@@ -403,6 +504,9 @@ function CreateInvoice() {
                   </button>
                 </div>
                 {copied && <p className="mt-1 text-[11px] font-medium text-teal-600">Copied!</p>}
+                <p className="mt-1.5 text-[11px] text-slate-500">
+                  Official sequence number ({officialNextNumber || "RFZ/…"}) will be generated once payment is confirmed.
+                </p>
               </div>
             </div>
           </SectionCard>
@@ -518,6 +622,75 @@ function CreateInvoice() {
 
           {/* 3. Service Items */}
           <SectionCard number={3} title="Service Items" subtitle="Add the services/products for this invoice">
+            {invoiceType === "MILESTONE" && (
+              <div className="mb-4">
+                {clientMilestonesLoading && (
+                  <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-xs font-medium text-slate-500">
+                    <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-teal-600 border-t-transparent" />
+                    <span>Checking for existing milestone projects for this client…</span>
+                  </div>
+                )}
+
+                {!clientMilestonesLoading && previousMilestoneProjects.length > 0 && (
+                  <div className="rounded-xl border border-teal-200 bg-gradient-to-r from-teal-50/80 via-emerald-50/40 to-teal-50/80 p-3.5 sm:p-4 shadow-xs">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-teal-600 text-xs font-black text-white shadow-xs">
+                            ↻
+                          </span>
+                          <h3 className="text-xs font-bold uppercase tracking-wider text-teal-900">
+                            Continue Previous Milestone Project
+                          </h3>
+                        </div>
+                        <p className="mt-1 text-xs text-teal-700">
+                          Select a previous milestone project to auto-fill its milestones schedule, lock already-billed milestones, and bill the next pending milestone at its divided cost.
+                        </p>
+                      </div>
+
+                      <div className="w-full sm:w-80">
+                        <select
+                          value={selectedMilestoneProject}
+                          onChange={(e) => handleSelectMilestoneProject(e.target.value)}
+                          className="h-9 w-full rounded-lg border border-teal-300 bg-white px-2.5 text-xs font-semibold text-slate-800 shadow-sm outline-none transition focus:border-teal-500 focus:ring-2 focus:ring-teal-200"
+                        >
+                          <option value="">-- Create New Milestone Project --</option>
+                          {previousMilestoneProjects.map((p) => (
+                            <option key={p.project_title} value={p.project_title}>
+                              {p.project_title} ({p.pending_count} Pending / {p.total_count} Milestones · ₹{Number(p.total_price).toLocaleString("en-IN")})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    {selectedMilestoneProject && (
+                      <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-teal-200/60 pt-2 text-xs text-teal-800">
+                        <span className="font-semibold text-teal-900">Active Project:</span>
+                        <span className="rounded-md bg-teal-200/70 px-2 py-0.5 font-bold text-teal-900">
+                          {selectedMilestoneProject}
+                        </span>
+                        <span>•</span>
+                        <span className="text-slate-600">
+                          Already Billed:{" "}
+                          <strong className="text-slate-900">
+                            {previousMilestoneProjects.find((p) => p.project_title === selectedMilestoneProject)?.billed_count || 0}
+                          </strong>
+                        </span>
+                        <span>•</span>
+                        <span className="text-emerald-700 font-semibold">
+                          Pending:{" "}
+                          <strong>
+                            {previousMilestoneProjects.find((p) => p.project_title === selectedMilestoneProject)?.pending_count || 0}
+                          </strong>
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
             <ServiceItemsTable
               items={items}
               onChange={setItems}

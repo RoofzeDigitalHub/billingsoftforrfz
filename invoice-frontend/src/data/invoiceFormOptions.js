@@ -59,6 +59,11 @@ export const INDIAN_STATES = Object.keys(STATE_GST_CODES);
 
 export const SERVICE_CATALOG = [
   "Website Design & Development",
+  "Website Design & Development – Wix",
+  "Advance Payment (50%) for Website Design & Development",
+  "Advance Payment (50%) for Website Design & Development – Wix",
+  "IT Consulting & IT Support Services",
+  "Final Pending Amount (Software Working)",
   "E-commerce Development",
   "Mobile App Development",
   "SEO & Digital Marketing",

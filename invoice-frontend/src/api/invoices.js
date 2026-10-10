@@ -74,3 +74,24 @@ export async function updateInvoiceStatus(id, paymentStatus, paymentDetails = {}
   });
   return fromApi(res.data);
 }
+
+/**
+ * Fetch previous milestone projects and billing status for a client.
+ */
+export async function getClientMilestones({ clientId, clientName } = {}) {
+  const params = new URLSearchParams();
+  if (clientId) params.set("client_id", clientId);
+  if (clientName) params.set("client_name", clientName);
+  const res = await http.get(`/invoices/client-milestones?${params.toString()}`);
+  return res.data || [];
+}
+
+/**
+ * Edit invoice metadata (client details, address, payment notes, terms, etc.)
+ * Strictly protects cost and invoice number from modification.
+ */
+export async function updateInvoiceDetails(id, details) {
+  const res = await http.patch(`/invoices/${encodeURIComponent(id)}`, details);
+  return fromApi(res.data);
+}
+

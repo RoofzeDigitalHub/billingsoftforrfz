@@ -1,19 +1,142 @@
 @import "tailwindcss";
 
-/* margin: 0 removes the browser's own print header/footer
-   (date, page title, URL, page numbers) from the PDF. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ==========================================================================
+   Global Dark Mode Palette & Component Styling
+   ========================================================================== */
+
+/* Dark Mode base page */
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body {
+  background-color: #020617;
+  color: #f8fafc;
+}
+
+/* Automatic Dark Mode theming for app cards & containers */
+.dark .bg-white {
+  background-color: #0f172a !important;
+}
+
+.dark .bg-slate-50 {
+  background-color: #1e293b !important;
+}
+
+.dark .bg-slate-100 {
+  background-color: #020617 !important;
+}
+
+/* Borders */
+.dark .border-slate-200,
+.dark .border-slate-300 {
+  border-color: #334155 !important;
+}
+
+.dark .border-slate-100 {
+  border-color: #1e293b !important;
+}
+
+/* Typography */
+.dark .text-slate-900,
+.dark .text-slate-800,
+.dark .text-slate-700 {
+  color: #f8fafc !important;
+}
+
+.dark .text-slate-600,
+.dark .text-slate-500 {
+  color: #94a3b8 !important;
+}
+
+/* Form Inputs, Selects, Textareas */
+.dark input:not([type="checkbox"]):not([type="radio"]),
+.dark select,
+.dark textarea {
+  background-color: #020617 !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #64748b !important;
+}
+
+/* Badges & Tables in Dark Mode */
+.dark tr:hover td {
+  background-color: rgba(30, 41, 59, 0.4) !important;
+}
+
+.dark table thead th {
+  background-color: #1e293b !important;
+  color: #cbd5e1 !important;
+  border-color: #334155 !important;
+}
+
+.dark table td {
+  border-color: #1e293b !important;
+}
+
+/* ==========================================================================
+   Printable Invoice Document Isolation
+   The invoice preview must ALWAYS stay crisp white paper in both themes.
+   ========================================================================== */
+.dark #invoice-print-area,
+.dark #invoice-print-area * {
+  color-scheme: light;
+}
+
+.dark #invoice-print-area {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+.dark #invoice-print-area .bg-white {
+  background-color: #ffffff !important;
+}
+
+.dark #invoice-print-area .text-slate-900,
+.dark #invoice-print-area .text-slate-800 {
+  color: #0f172a !important;
+}
+
+.dark #invoice-print-area .text-slate-700,
+.dark #invoice-print-area .text-slate-600,
+.dark #invoice-print-area .text-slate-500 {
+  color: #475569 !important;
+}
+
+.dark #invoice-print-area .border-slate-900 {
+  border-color: #0f172a !important;
+}
+
+.dark #invoice-print-area .border-slate-100 {
+  border-color: #f1f5f9 !important;
+}
+
+.dark #invoice-print-area .bg-\[\#14171a\] {
+  background-color: #14171a !important;
+}
+
+/* ==========================================================================
+   A4 Print Media Rules
+   ========================================================================== */
 @page {
-  size: A4;
+  size: A4 portrait;
   margin: 0;
 }
 
 @media print {
   html,
   body {
-    margin: 0;
-    padding: 0;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
   body * {
     visibility: hidden;
@@ -26,10 +149,15 @@
     position: absolute;
     left: 0;
     top: 0;
-    width: 100%;
-    margin: 0;
+    width: 100% !important;
+    min-height: 296mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
     border: 0 !important;
     border-radius: 0 !important;
     box-shadow: none !important;
+    page-break-after: avoid !important;
+    page-break-inside: avoid !important;
+    break-after: avoid !important;
   }
 }
