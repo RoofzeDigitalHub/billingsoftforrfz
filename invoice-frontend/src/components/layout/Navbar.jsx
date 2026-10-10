@@ -1,10 +1,12 @@
 import { getSession } from "../../utils/auth";
 import { useTheme } from "../../utils/theme";
-import { IconMenu, IconBell, IconSun, IconMoon } from "../icons/Icons";
+import { usePWAInstall } from "../../utils/pwa";
+import { IconMenu, IconBell, IconSun, IconMoon, IconInstall } from "../icons/Icons";
 
 function Navbar({ breadcrumbs, onMenuClick }) {
   const session = getSession();
   const { isDark, toggleTheme } = useTheme();
+  const { isStandalone, installApp } = usePWAInstall();
 
   return (
     <div className="sticky top-0 z-30 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 sm:px-6 lg:px-8 transition-colors">
@@ -22,19 +24,36 @@ function Navbar({ breadcrumbs, onMenuClick }) {
         {/* Breadcrumbs (Left aligned now that search bar is removed) */}
         {breadcrumbs && breadcrumbs.length > 0 && (
           <div className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
-            {breadcrumbs.map((crumb, idx) => (
-              <span key={crumb} className="flex items-center gap-1.5">
-                {idx > 0 && <span>/</span>}
-                <span className={idx === breadcrumbs.length - 1 ? "font-semibold text-slate-700 dark:text-slate-200" : ""}>
-                  {crumb}
+            {breadcrumbs.map((crumb, idx) => {
+              const label = typeof crumb === "object" && crumb !== null ? crumb.label : String(crumb);
+              return (
+                <span key={typeof crumb === "object" ? crumb.label || idx : crumb} className="flex items-center gap-1.5">
+                  {idx > 0 && <span>/</span>}
+                  <span className={idx === breadcrumbs.length - 1 ? "font-semibold text-slate-700 dark:text-slate-200" : ""}>
+                    {label}
+                  </span>
                 </span>
-              </span>
-            ))}
+              );
+            })}
           </div>
         )}
 
-        {/* Right side items: Theme toggle + Notifications + User profile (Chevron removed) */}
+        {/* Right side items: Install App + Theme toggle + Notifications + User profile */}
         <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
+          {/* PWA Install Button */}
+          {!isStandalone && (
+            <button
+              type="button"
+              onClick={installApp}
+              className="flex items-center gap-1.5 rounded-xl border border-purple-200 dark:border-purple-500/40 bg-purple-50 dark:bg-purple-950/50 px-2.5 py-1.5 text-xs font-bold text-purple-700 dark:text-purple-300 shadow-xs hover:bg-purple-100 dark:hover:bg-purple-900/40 transition active:scale-95"
+              title="Install Roofze App on your phone or desktop"
+              aria-label="Install App"
+            >
+              <IconInstall className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+              <span className="hidden sm:inline">Install</span>
+            </button>
+          )}
+
           {/* Dark / Light Mode Toggle Button */}
           <button
             type="button"

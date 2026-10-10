@@ -26,7 +26,7 @@ html.dark body {
 }
 
 .dark .bg-slate-100 {
-  background-color: #020617 !important;
+  background-color: #0f172a !important;
 }
 
 /* Borders */
@@ -35,29 +35,88 @@ html.dark body {
   border-color: #334155 !important;
 }
 
+.dark .border-slate-50,
 .dark .border-slate-100 {
   border-color: #1e293b !important;
 }
 
-/* Typography */
+/* Typography contrast */
 .dark .text-slate-900,
 .dark .text-slate-800,
 .dark .text-slate-700 {
   color: #f8fafc !important;
 }
 
-.dark .text-slate-600,
+.dark .text-slate-600 {
+  color: #e2e8f0 !important;
+}
+
 .dark .text-slate-500 {
+  color: #cbd5e1 !important;
+}
+
+.dark .text-slate-400 {
   color: #94a3b8 !important;
+}
+
+/* Brand & Action Colors in Dark Mode */
+.dark .text-teal-700,
+.dark .text-teal-800,
+.dark .text-teal-600 {
+  color: #2dd4bf !important; /* teal-400 */
+}
+
+.dark .hover\:text-teal-700:hover,
+.dark .hover\:text-teal-800:hover {
+  color: #5eead4 !important; /* teal-300 */
+}
+
+/* Status & Alert Badges in Dark Mode */
+.dark .bg-teal-50 {
+  background-color: rgba(13, 148, 136, 0.2) !important;
+  color: #2dd4bf !important;
+}
+
+.dark .bg-red-50 {
+  background-color: rgba(239, 68, 68, 0.2) !important;
+  color: #f87171 !important;
+}
+
+.dark .bg-emerald-50 {
+  background-color: rgba(16, 185, 129, 0.2) !important;
+  color: #34d399 !important;
+}
+
+.dark .bg-amber-50,
+.dark .bg-amber-100 {
+  background-color: rgba(245, 158, 11, 0.2) !important;
+  color: #fcd34d !important;
+}
+
+.dark .bg-sky-50,
+.dark .bg-sky-100 {
+  background-color: rgba(14, 165, 233, 0.2) !important;
+  color: #38bdf8 !important;
+}
+
+.dark .bg-lime-100 {
+  background-color: rgba(132, 204, 22, 0.2) !important;
+  color: #bef264 !important;
 }
 
 /* Form Inputs, Selects, Textareas */
 .dark input:not([type="checkbox"]):not([type="radio"]),
 .dark select,
 .dark textarea {
-  background-color: #020617 !important;
+  background-color: #0b1329 !important;
   color: #f8fafc !important;
   border-color: #334155 !important;
+  color-scheme: dark !important;
+}
+
+.dark select option {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
 }
 
 .dark input::placeholder,
@@ -65,15 +124,26 @@ html.dark body {
   color: #64748b !important;
 }
 
-/* Badges & Tables in Dark Mode */
-.dark tr:hover td {
-  background-color: rgba(30, 41, 59, 0.4) !important;
+.dark input:disabled,
+.dark select:disabled,
+.dark textarea:disabled {
+  background-color: #0f172a !important;
+  color: #64748b !important;
+  border-color: #1e293b !important;
+}
+
+/* Badges & Tables in Dark Mode - Fix Hover Issue */
+.dark tr:hover,
+.dark tr:hover td,
+.dark .hover\:bg-slate-50:hover,
+.dark .hover\:bg-slate-50\/80:hover {
+  background-color: #1e293b !important; /* solid slate-800 on hover, never white */
 }
 
 .dark table thead th {
-  background-color: #1e293b !important;
+  background-color: #0f172a !important;
   color: #cbd5e1 !important;
-  border-color: #334155 !important;
+  border-color: #1e293b !important;
 }
 
 .dark table td {

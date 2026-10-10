@@ -127,8 +127,8 @@ function ServiceItemsTable({ items, onChange, location, isGst, invoiceType }) {
     onChange(items.filter((_, i) => i !== index));
   };
 
-  const fieldLabelClass = "mb-1 block text-[10px] font-semibold uppercase tracking-wide text-slate-400";
-  const computedBoxClass = "flex h-9 w-full items-center truncate rounded-lg bg-slate-100 px-2.5 text-sm font-medium text-slate-600";
+  const fieldLabelClass = "mb-1 block text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-400";
+  const computedBoxClass = "flex h-9 w-full items-center truncate rounded-lg bg-slate-100 dark:bg-slate-800 px-2.5 text-sm font-medium text-slate-600 dark:text-slate-300";
 
   return (
     <div>
@@ -141,10 +141,10 @@ function ServiceItemsTable({ items, onChange, location, isGst, invoiceType }) {
         const withGst = (base) => round2(base + (base * itemRate) / 100);
         const itemTotalWithGst = withGst(itemTotal);
         return (
-            <div key={index} className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 sm:p-4">
+            <div key={index} className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 p-3 sm:p-4">
               {/* Row header */}
               <div className="mb-3 flex items-center justify-between">
-                <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-400 dark:text-slate-400">
                   <IconGrip />
                   <span>Item {index + 1}</span>
                 </div>
@@ -152,7 +152,7 @@ function ServiceItemsTable({ items, onChange, location, isGst, invoiceType }) {
                   type="button"
                   onClick={() => removeRow(index)}
                   disabled={items.length === 1}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-30"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 dark:text-slate-500 hover:bg-red-50 dark:hover:bg-red-950/40 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-30 transition"
                   aria-label="Remove item"
                   title="Remove item"
                 >
@@ -172,7 +172,7 @@ function ServiceItemsTable({ items, onChange, location, isGst, invoiceType }) {
                       onChange={(e) =>
                         updateItem(index, "service_description", e.target.value === "Custom Service" ? "" : e.target.value)
                       }
-                      className="h-9 w-full appearance-none truncate rounded-lg border border-slate-300 bg-white pl-3 pr-8 text-sm outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
+                      className="h-9 w-full appearance-none truncate rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 pl-3 pr-8 text-sm text-slate-800 dark:text-slate-100 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100 dark:focus:ring-teal-900/40"
                     >
                       {SERVICE_CATALOG.map((service) => (
                         <option key={service} value={service}>
@@ -180,7 +180,7 @@ function ServiceItemsTable({ items, onChange, location, isGst, invoiceType }) {
                         </option>
                       ))}
                     </select>
-                    <span className="pointer-events-none absolute inset-y-0 right-2.5 flex items-center text-slate-400">
+                    <span className="pointer-events-none absolute inset-y-0 right-2.5 flex items-center text-slate-400 dark:text-slate-500">
                       <IconChevronDown className="h-3.5 w-3.5" />
                     </span>
                   </div>
@@ -190,7 +190,7 @@ function ServiceItemsTable({ items, onChange, location, isGst, invoiceType }) {
                       value={item.service_description}
                       onChange={(e) => updateItem(index, "service_description", e.target.value)}
                       placeholder="Describe the service…"
-                      className="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-1.5 text-xs outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
+                      className="mt-1.5 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100 dark:focus:ring-teal-900/40"
                     />
                   )}
                 </div>
@@ -204,7 +204,7 @@ function ServiceItemsTable({ items, onChange, location, isGst, invoiceType }) {
                     step="1"
                     value={item.qty}
                     onChange={(e) => updateItem(index, "qty", e.target.value)}
-                    className="h-9 w-full rounded-lg border border-slate-300 px-2.5 text-sm outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
+                    className="h-9 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-2.5 text-sm text-slate-800 dark:text-slate-100 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100 dark:focus:ring-teal-900/40"
                   />
                 </div>
 
@@ -218,7 +218,7 @@ function ServiceItemsTable({ items, onChange, location, isGst, invoiceType }) {
                     value={item.total_price}
                     onChange={(e) => updateItem(index, "total_price", e.target.value)}
                     placeholder="15000"
-                    className="h-9 w-full rounded-lg border border-slate-300 px-2.5 text-sm outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
+                    className="h-9 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-2.5 text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100 dark:focus:ring-teal-900/40"
                   />
                 </div>
 

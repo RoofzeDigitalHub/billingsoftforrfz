@@ -11,6 +11,7 @@ const pool = require('./config/db');
 const apiRoutes = require('./routes');
 const { ensureProposalTables } = require('./scripts/migrate-proposals');
 const { ensureAdminAuthTables } = require('./scripts/migrate-admin-auth');
+const { ensureExpenseTables } = require('./scripts/migrate-expenses');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -65,8 +66,12 @@ ensureProposalTables({ log: () => {} })
   .catch((err) => console.error(`\u26A0\uFE0F  Proposal tables could not be prepared: ${err.message}`));
 
 ensureAdminAuthTables({ log: () => {} })
-  .then(() => console.log('\u2705 Admin auth tables and seed users ready'))
-  .catch((err) => console.error(`\u26A0\uFE0F  Admin auth tables could not be prepared: ${err.message}`));
+  .then(() => console.log('✅ Admin auth tables and seed users ready'))
+  .catch((err) => console.error(`⚠️  Admin auth tables could not be prepared: ${err.message}`));
+
+ensureExpenseTables({ log: () => {} })
+  .then(() => console.log('✅ Expense & income tables ready'))
+  .catch((err) => console.error(`⚠️  Expense tables could not be prepared: ${err.message}`));
 
 app.listen(PORT, () => {
   console.log(`✅ Server running: http://localhost:${PORT}`);

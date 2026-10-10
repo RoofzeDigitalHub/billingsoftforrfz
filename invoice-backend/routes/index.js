@@ -44,7 +44,12 @@ router.use('/terms-master', createCrudRouter('terms_master'));
 const authRoutes = require('./authRoutes');
 router.use('/auth', authRoutes);
 
-// Admin users management
-router.use('/admin-users', createCrudRouter('admin_users'));
+// Expenses and transactions management
+const expenseRoutes = require('./expenseRoutes');
+router.use('/expenses', expenseRoutes);
+
+// Business & financial reports (Client Ledger, Income & Expense date-wise)
+const reportRoutes = require('./reportRoutes');
+router.use('/reports', reportRoutes);
 
 module.exports = router;

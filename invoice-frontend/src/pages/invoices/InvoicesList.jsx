@@ -9,14 +9,14 @@ import { formatINR, financialYearLabel } from "../../utils/InvoiceCalculations";
 function StatusBadge({ status }) {
   if (status === "PAID") {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-teal-50 px-2.5 py-1 text-xs font-bold text-teal-700">
-        <span className="h-1.5 w-1.5 rounded-full bg-teal-600" /> PAID
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-teal-50 dark:bg-teal-950/60 dark:border dark:border-teal-500/30 px-2.5 py-1 text-xs font-bold text-teal-700 dark:text-teal-300">
+        <span className="h-1.5 w-1.5 rounded-full bg-teal-600 dark:bg-teal-400" /> PAID
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-2.5 py-1 text-xs font-bold text-red-500">
-      <span className="h-1.5 w-1.5 rounded-full bg-red-500" /> PENDING
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-red-50 dark:bg-red-950/60 dark:border dark:border-red-500/30 px-2.5 py-1 text-xs font-bold text-red-500 dark:text-red-300">
+      <span className="h-1.5 w-1.5 rounded-full bg-red-500 dark:bg-red-400" /> PENDING
     </span>
   );
 }
@@ -25,9 +25,9 @@ function LocationTag({ locationId, locations }) {
   const loc = locations.find((l) => String(l.id) === String(locationId));
   if (!loc) return "—";
   return loc.location_type === "GST" ? (
-    <span className="rounded-md bg-lime-100 px-2 py-0.5 text-[11px] font-bold text-slate-800">GST</span>
+    <span className="rounded-md bg-lime-100 dark:bg-lime-950/60 dark:border dark:border-lime-500/30 px-2 py-0.5 text-[11px] font-bold text-slate-800 dark:text-lime-300">GST</span>
   ) : (
-    <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-500">NON-GST</span>
+    <span className="rounded-md bg-slate-100 dark:bg-slate-800 dark:border dark:border-slate-700 px-2 py-0.5 text-[11px] font-bold text-slate-500 dark:text-slate-300">NON-GST</span>
   );
 }
 
@@ -110,7 +110,7 @@ function InvoicesList() {
           <select
             value={locationFilter}
             onChange={(e) => setLocationFilter(e.target.value)}
-            className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium"
+            className="rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 outline-none"
           >
             <option value="">All locations</option>
             {billingLocations.map((loc) => (
@@ -122,7 +122,7 @@ function InvoicesList() {
           <select
             value={fyFilter}
             onChange={(e) => setFyFilter(e.target.value)}
-            className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium"
+            className="rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 outline-none"
           >
             <option value="">All financial years</option>
             {financialYears.map((fy) => (
@@ -134,26 +134,26 @@ function InvoicesList() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium"
+            className="rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 outline-none"
           >
             <option value="">All statuses</option>
             <option value="PAID">Paid</option>
             <option value="PENDING">Pending</option>
           </select>
-          <div className="flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-2.5 py-1.5">
+          <div className="flex items-center gap-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-2.5 py-1.5">
             <input
               type="date"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
-              className="w-[120px] text-xs font-medium text-slate-600 outline-none"
+              className="w-[120px] text-xs font-medium text-slate-600 dark:text-slate-200 bg-transparent outline-none"
               aria-label="From date"
             />
-            <span className="text-xs text-slate-300">–</span>
+            <span className="text-xs text-slate-400">–</span>
             <input
               type="date"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
-              className="w-[120px] text-xs font-medium text-slate-600 outline-none"
+              className="w-[120px] text-xs font-medium text-slate-600 dark:text-slate-200 bg-transparent outline-none"
               aria-label="To date"
             />
           </div>
@@ -161,13 +161,13 @@ function InvoicesList() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search client or invoice #"
-            className="min-w-0 flex-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium sm:min-w-[200px] sm:flex-none"
+            className="min-w-0 flex-1 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-xs font-medium text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none sm:min-w-[200px] sm:flex-none"
           />
           {hasActiveFilters && (
             <button
               type="button"
               onClick={clearFilters}
-              className="rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-400 hover:text-slate-700"
+              className="rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-400 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition"
             >
               Clear filters
             </button>
@@ -175,25 +175,25 @@ function InvoicesList() {
         </div>
         <Link
           to="/dashboard/invoices/create"
-          className="inline-flex items-center justify-center rounded-xl bg-lime-300 px-4 py-2.5 text-sm font-semibold text-slate-900 hover:bg-lime-400"
+          className="inline-flex items-center justify-center rounded-xl bg-lime-300 px-4 py-2.5 text-sm font-semibold text-slate-900 hover:bg-lime-400 transition"
         >
           + New Invoice
         </Link>
       </div>
 
       {loadError && (
-        <div className="mb-4 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+        <div className="mb-4 rounded-xl border border-red-100 dark:border-red-900/40 bg-red-50 dark:bg-red-950/40 px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400">
           {loadError} — make sure the backend is running (`npm run dev` in invoice-backend).
         </div>
       )}
 
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
         {loading ? (
-          <div className="px-6 py-14 text-center text-sm text-slate-400">Loading invoices…</div>
+          <div className="px-6 py-14 text-center text-sm text-slate-400 dark:text-slate-500">Loading invoices…</div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center px-6 py-14 text-center">
-            <div className="mb-1 text-sm font-bold text-slate-900">No invoices match</div>
-            <div className="mb-4 max-w-xs text-xs text-slate-400">
+            <div className="mb-1 text-sm font-bold text-slate-900 dark:text-white">No invoices match</div>
+            <div className="mb-4 max-w-xs text-xs text-slate-400 dark:text-slate-500">
               Try clearing filters, or create a new invoice.
             </div>
             <div className="flex gap-2">
@@ -201,14 +201,14 @@ function InvoicesList() {
                 <button
                   type="button"
                   onClick={clearFilters}
-                  className="rounded-xl border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                  className="rounded-xl border border-slate-300 dark:border-slate-700 px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
                 >
                   Clear filters
                 </button>
               )}
               <Link
                 to="/dashboard/invoices/create"
-                className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800"
+                className="rounded-xl bg-slate-900 dark:bg-slate-800 border dark:border-slate-700 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 dark:hover:bg-slate-700 transition"
               >
                 Create Invoice
               </Link>
@@ -218,48 +218,48 @@ function InvoicesList() {
           <div className="overflow-x-auto">
             <table className="w-full min-w-[720px] text-sm">
               <thead>
-                <tr className="border-b border-slate-100 text-left text-xs text-slate-400">
-                  <th className="px-5 py-3 font-semibold">Invoice #</th>
-                  <th className="px-5 py-3 font-semibold">Date</th>
-                  <th className="px-5 py-3 font-semibold">Client</th>
-                  <th className="px-5 py-3 font-semibold">Location</th>
-                  <th className="px-5 py-3 font-semibold">Total</th>
-                  <th className="px-5 py-3 font-semibold">Status</th>
+                <tr className="border-b border-slate-100 dark:border-slate-800 text-left text-xs text-slate-400 dark:text-slate-400">
+                  <th className="px-5 py-3 font-semibold dark:text-slate-300">Invoice #</th>
+                  <th className="px-5 py-3 font-semibold dark:text-slate-300">Date</th>
+                  <th className="px-5 py-3 font-semibold dark:text-slate-300">Client</th>
+                  <th className="px-5 py-3 font-semibold dark:text-slate-300">Location</th>
+                  <th className="px-5 py-3 font-semibold dark:text-slate-300">Total</th>
+                  <th className="px-5 py-3 font-semibold dark:text-slate-300">Status</th>
                   <th className="px-5 py-3"></th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((inv) => (
-                  <tr key={inv.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50">
+                  <tr key={inv.id} className="border-b border-slate-50 dark:border-slate-800/80 last:border-0 hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition">
                     <td className="px-5 py-3 font-semibold">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-slate-900">{inv.invoice_number}</span>
+                        <span className="text-slate-900 dark:text-white font-mono">{inv.invoice_number}</span>
                         {inv.payment_status !== "PAID" && String(inv.invoice_number || "").startsWith("TMP-") && (
-                          <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-800">
+                          <span className="rounded bg-amber-100 dark:bg-amber-950/60 dark:border dark:border-amber-500/30 px-1.5 py-0.5 text-[10px] font-bold text-amber-800 dark:text-amber-300">
                             Temp
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className="px-5 py-3 text-slate-500">
+                    <td className="px-5 py-3 text-slate-500 dark:text-slate-300 font-medium">
                       {new Date(inv.invoice_date).toLocaleDateString("en-IN", {
                         day: "2-digit",
                         month: "short",
                         year: "numeric",
                       })}
                     </td>
-                    <td className="px-5 py-3">{inv.client_name}</td>
+                    <td className="px-5 py-3 text-slate-800 dark:text-slate-200 font-medium">{inv.client_name}</td>
                     <td className="px-5 py-3">
                       <LocationTag locationId={inv.billing_location_id} locations={billingLocations} />
                     </td>
-                    <td className="px-5 py-3 font-semibold">{formatINR(inv.total_amount)}</td>
+                    <td className="px-5 py-3 font-semibold text-slate-900 dark:text-white">{formatINR(inv.total_amount)}</td>
                     <td className="px-5 py-3">
                       <StatusBadge status={inv.payment_status} />
                     </td>
                     <td className="px-5 py-3 text-right">
                       <Link
                         to={`/dashboard/invoices/${inv.id}`}
-                        className="text-xs font-semibold text-teal-700 hover:underline"
+                        className="text-xs font-semibold text-teal-700 dark:text-teal-300 hover:text-teal-800 dark:hover:text-teal-200 hover:underline transition"
                       >
                         View →
                       </Link>

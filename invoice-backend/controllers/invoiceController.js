@@ -23,6 +23,7 @@ const {
   buildInvoiceNumber,
   computeInvoice,
 } = require('../utils/invoiceMath');
+const { syncInvoicePaidToExpenses, removeInvoiceExpenseSync } = require('../utils/expenseSync');
 
 // DATE columns are formatted in SQL so the API returns "2026-09-28" and not a
 // JS Date that shifts by the server's timezone. DECIMALs are converted to
@@ -512,6 +513,14 @@ module.exports = {
         }
       }
 
+      if (paymentStatus === 'PAID') {
+        await syncInvoicePaidToExpenses(
+          conn,
+          { id: invoiceId, invoice_number: invoiceNumber, client_name: clientName, total_amount: totals.total_amount },
+          { payment_date: body.payment_date, amount_paid: body.amount_paid, payment_reference: body.payment_reference }
+        );
+      }
+
       await conn.commit();
       const saved = await loadInvoice(conn, invoiceId);
       res.status(201).json({ success: true, data: saved });
@@ -613,6 +622,12 @@ module.exports = {
           ]
         );
 
+        await syncInvoicePaidToExpenses(
+          conn,
+          { id: inv.id, invoice_number: invoiceNumber, client_name: inv.client_name, total_amount: inv.total_amount },
+          { payment_date: date, amount_paid: amount, payment_reference: reference }
+        );
+
         await conn.commit();
         const updated = await loadInvoice(conn, req.params.id);
         res.json({ success: true, data: updated });
@@ -627,6 +642,7 @@ module.exports = {
           [req.params.id]
         );
         if (result.affectedRows === 0) throw new HttpError(404, 'Invoice not found');
+        await removeInvoiceExpenseSync(pool, req.params.id);
         res.json({ success: true, data: await loadInvoice(pool, req.params.id) });
       }
     } catch (err) {

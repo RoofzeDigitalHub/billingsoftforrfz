@@ -91,26 +91,26 @@ function ProposalsList() {
         <div className="mb-4 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">{error}</div>
       )}
 
-      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
         <table className="w-full min-w-[760px] text-left text-sm">
-          <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+          <thead className="bg-slate-50 dark:bg-slate-800/60 text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
             <tr>
-              <th className="px-4 py-3">Proposal No.</th>
-              <th className="px-4 py-3">Client</th>
-              <th className="px-4 py-3">Title</th>
-              <th className="px-4 py-3">Date</th>
-              <th className="px-4 py-3">Valid Till</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+              <th className="px-4 py-3 dark:text-slate-300">Proposal No.</th>
+              <th className="px-4 py-3 dark:text-slate-300">Client</th>
+              <th className="px-4 py-3 dark:text-slate-300">Title</th>
+              <th className="px-4 py-3 dark:text-slate-300">Date</th>
+              <th className="px-4 py-3 dark:text-slate-300">Valid Till</th>
+              <th className="px-4 py-3 dark:text-slate-300">Status</th>
+              <th className="px-4 py-3 text-right dark:text-slate-300">Actions</th>
             </tr>
           </thead>
           <tbody>
             {loading && (
-              <tr><td colSpan={7} className="px-4 py-10 text-center text-slate-400">Loading proposals…</td></tr>
+              <tr><td colSpan={7} className="px-4 py-10 text-center text-slate-400 dark:text-slate-500">Loading proposals…</td></tr>
             )}
             {!loading && filtered.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-10 text-center text-slate-400">
+                <td colSpan={7} className="px-4 py-10 text-center text-slate-400 dark:text-slate-500">
                   {proposals.length === 0 ? "No proposals yet — create your first one." : "No proposals match your filters."}
                 </td>
               </tr>
@@ -119,18 +119,18 @@ function ProposalsList() {
               <tr
                 key={p.id}
                 onClick={() => navigate(`/dashboard/proposals/${p.id}`)}
-                className="cursor-pointer border-t border-slate-100 hover:bg-slate-50"
+                className="cursor-pointer border-t border-slate-100 dark:border-slate-800 hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition"
               >
-                <td className="px-4 py-3 font-semibold text-slate-900">{p.proposal_number}</td>
-                <td className="px-4 py-3 text-slate-700">{p.client_name || "—"}</td>
-                <td className="max-w-xs truncate px-4 py-3 text-slate-700">{p.proposal_title || "—"}</td>
-                <td className="px-4 py-3 text-slate-600">{displayDate(p.proposal_date)}</td>
-                <td className="px-4 py-3 text-slate-600">{displayDate(p.valid_till) || "—"}</td>
+                <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white font-mono">{p.proposal_number}</td>
+                <td className="px-4 py-3 text-slate-700 dark:text-slate-200">{p.client_name || "—"}</td>
+                <td className="max-w-xs truncate px-4 py-3 text-slate-700 dark:text-slate-200">{p.proposal_title || "—"}</td>
+                <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{displayDate(p.proposal_date)}</td>
+                <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{displayDate(p.valid_till) || "—"}</td>
                 <td className="px-4 py-3"><ProposalStatusBadge status={p.status} /></td>
                 <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
-                  <Link to={`/dashboard/proposals/${p.id}`} className="mr-3 text-xs font-semibold text-teal-700 hover:underline">View</Link>
-                  <Link to={`/dashboard/proposals/${p.id}/edit`} className="mr-3 text-xs font-semibold text-slate-600 hover:underline">Edit</Link>
-                  <button type="button" onClick={() => handleDelete(p)} className="text-xs font-semibold text-red-500 hover:underline">
+                  <Link to={`/dashboard/proposals/${p.id}`} className="mr-3 text-xs font-semibold text-teal-700 dark:text-teal-300 hover:text-teal-800 dark:hover:text-teal-200 hover:underline">View</Link>
+                  <Link to={`/dashboard/proposals/${p.id}/edit`} className="mr-3 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white hover:underline">Edit</Link>
+                  <button type="button" onClick={() => handleDelete(p)} className="text-xs font-semibold text-red-500 dark:text-red-400 hover:underline">
                     Delete
                   </button>
                 </td>

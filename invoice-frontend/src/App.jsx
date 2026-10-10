@@ -16,6 +16,9 @@ import ClientMaster from "./pages/clients/ClientMaster";
 import CreateProposal from "./pages/proposals/CreateProposal";
 import ProposalsList from "./pages/proposals/ProposalsList";
 import ProposalDetail from "./pages/proposals/ProposalDetail";
+import ExpensesList from "./pages/expenses/ExpensesList";
+import ClientLedgerReport from "./pages/reports/ClientLedgerReport";
+import IncomeExpenseReport from "./pages/reports/IncomeExpenseReport";
 
 function App() {
   return (
@@ -114,6 +117,36 @@ function App() {
           element={
             <ProtectedRoute>
               <ClientMaster />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Expenses & Transactions */}
+        <Route
+          path="/dashboard/expenses"
+          element={
+            <ProtectedRoute>
+              <ExpensesList />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Reports: Client Ledger */}
+        <Route
+          path="/dashboard/reports/client-ledger"
+          element={
+            <ProtectedRoute>
+              <ClientLedgerReport />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Reports: Income vs Expense */}
+        <Route
+          path="/dashboard/reports/income-expense"
+          element={
+            <ProtectedRoute>
+              <IncomeExpenseReport />
             </ProtectedRoute>
           }
         />

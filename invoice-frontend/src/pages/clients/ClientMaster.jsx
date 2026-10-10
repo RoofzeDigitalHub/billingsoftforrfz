@@ -39,12 +39,14 @@ function SectionTitle({ icon, children, tone = "mint" }) {
   return (
     <div
       className={`mb-4 flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-bold ${
-        tone === "blue" ? "bg-sky-50 text-slate-700" : "bg-emerald-50 text-slate-700"
+        tone === "blue"
+          ? "bg-sky-50 dark:bg-sky-950/60 dark:border dark:border-sky-500/30 text-slate-700 dark:text-sky-300"
+          : "bg-emerald-50 dark:bg-emerald-950/60 dark:border dark:border-emerald-500/30 text-slate-700 dark:text-emerald-300"
       }`}
     >
       <span
         className={`flex h-6 w-6 items-center justify-center rounded-full ${
-          tone === "blue" ? "bg-sky-100 text-sky-700" : "bg-emerald-100 text-emerald-700"
+          tone === "blue" ? "bg-sky-100 dark:bg-sky-900/80 text-sky-700 dark:text-sky-300" : "bg-emerald-100 dark:bg-emerald-900/80 text-emerald-700 dark:text-emerald-300"
         }`}
       >
         {icon}
@@ -79,7 +81,7 @@ const isRequired = (field) => REQUIRED_FIELDS.includes(field);
 function Field({ label, required = false, children, className = "" }) {
   return (
     <label className={`block ${className}`}>
-      <span className="mb-1.5 block text-xs font-semibold text-slate-600">
+      <span className="mb-1.5 block text-xs font-semibold text-slate-600 dark:text-slate-300">
         {label} {required && <span className="text-red-500">*</span>}
       </span>
       {children}
@@ -88,7 +90,7 @@ function Field({ label, required = false, children, className = "" }) {
 }
 
 const inputClass =
-  "w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-teal-400 focus:ring-2 focus:ring-teal-100";
+  "w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2.5 text-sm text-slate-700 dark:text-slate-100 outline-none transition placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-teal-400 focus:ring-2 focus:ring-teal-100 dark:focus:ring-teal-900/40";
 
 function ClientForm({ editingClient, onSaved, onCancel }) {
   // Backfill stateCode for records saved before this field existed, so
@@ -355,15 +357,15 @@ function ClientList({ clients, onAdd, onEdit, onToggleStatus, togglingIds }) {
         </button>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-slate-100 p-4">
+      <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+        <div className="border-b border-slate-100 dark:border-slate-800 p-4">
           <div className="relative max-w-md">
-            <IconSearch className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <IconSearch className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
             <input
               value={search}
               onChange={(e) => changeSearch(e.target.value)}
               placeholder="Search by name, phone, city or state..."
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-sm outline-none transition focus:border-teal-400 focus:bg-white focus:ring-2 focus:ring-teal-100"
+              className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 py-2.5 pl-9 pr-3 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none transition focus:border-teal-400 focus:bg-white dark:focus:bg-slate-800 focus:ring-2 focus:ring-teal-100 dark:focus:ring-teal-900/40"
             />
           </div>
         </div>
@@ -371,27 +373,27 @@ function ClientList({ clients, onAdd, onEdit, onToggleStatus, togglingIds }) {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[850px] text-sm">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/70 text-left text-xs text-slate-500">
-                <th className="px-4 py-3 font-semibold">#</th>
-                <th className="px-4 py-3 font-semibold">Client Name</th>
-                <th className="px-4 py-3 font-semibold">Contact Person</th>
-                <th className="px-4 py-3 font-semibold">City</th>
-                <th className="px-4 py-3 font-semibold">State</th>
-                <th className="px-4 py-3 font-semibold">Status</th>
-                <th className="px-4 py-3 text-right font-semibold">Action</th>
+              <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 text-left text-xs text-slate-500 dark:text-slate-400">
+                <th className="px-4 py-3 font-semibold dark:text-slate-300">#</th>
+                <th className="px-4 py-3 font-semibold dark:text-slate-300">Client Name</th>
+                <th className="px-4 py-3 font-semibold dark:text-slate-300">Contact Person</th>
+                <th className="px-4 py-3 font-semibold dark:text-slate-300">City</th>
+                <th className="px-4 py-3 font-semibold dark:text-slate-300">State</th>
+                <th className="px-4 py-3 font-semibold dark:text-slate-300">Status</th>
+                <th className="px-4 py-3 text-right font-semibold dark:text-slate-300">Action</th>
               </tr>
             </thead>
             <tbody>
               {rows.length ? (
                 rows.map((client, index) => (
-                  <tr key={client.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/80">
-                    <td className="px-4 py-3 text-xs font-semibold text-slate-500">
+                  <tr key={client.id} className="border-b border-slate-50 dark:border-slate-800/80 last:border-0 hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition">
+                    <td className="px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 font-mono">
                       {(currentPage - 1) * pageSize + index + 1}
                     </td>
-                    <td className="px-4 py-3 font-semibold text-slate-800">{client.name}</td>
-                    <td className="px-4 py-3 text-slate-600">{client.contact || "—"}</td>
-                    <td className="px-4 py-3 text-slate-600">{client.city || "—"}</td>
-                    <td className="px-4 py-3 text-slate-600">{client.state || "—"}</td>
+                    <td className="px-4 py-3 font-semibold text-slate-800 dark:text-white">{client.name}</td>
+                    <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{client.contact || "—"}</td>
+                    <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{client.city || "—"}</td>
+                    <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{client.state || "—"}</td>
                     <td className="px-4 py-3">
                       <StatusToggle
                         active={client.status !== "Inactive"}
@@ -401,7 +403,7 @@ function ClientList({ clients, onAdd, onEdit, onToggleStatus, togglingIds }) {
                       />
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <button onClick={() => onEdit(client)} className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-teal-700 hover:bg-teal-50">
+                      <button onClick={() => onEdit(client)} className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-teal-700 dark:text-teal-300 hover:bg-teal-50 dark:hover:bg-slate-800 transition">
                         Edit
                       </button>
                     </td>
@@ -410,8 +412,8 @@ function ClientList({ clients, onAdd, onEdit, onToggleStatus, togglingIds }) {
               ) : (
                 <tr>
                   <td colSpan="7" className="px-5 py-14 text-center">
-                    <div className="text-sm font-bold text-slate-800">No clients found</div>
-                    <div className="mt-1 text-xs text-slate-400">Try a different search or add a new client.</div>
+                    <div className="text-sm font-bold text-slate-800 dark:text-white">No clients found</div>
+                    <div className="mt-1 text-xs text-slate-400 dark:text-slate-500">Try a different search or add a new client.</div>
                   </td>
                 </tr>
               )}
@@ -419,18 +421,18 @@ function ClientList({ clients, onAdd, onEdit, onToggleStatus, togglingIds }) {
           </table>
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-slate-100 px-4 py-3 text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 border-t border-slate-100 dark:border-slate-800 px-4 py-3 text-xs text-slate-400 dark:text-slate-400 sm:flex-row sm:items-center sm:justify-between">
           <span>
             Showing {filtered.length ? (currentPage - 1) * pageSize + 1 : 0} to {Math.min(currentPage * pageSize, filtered.length)} of {filtered.length} clients
           </span>
           <div className="flex items-center gap-1">
-            <button disabled={currentPage === 1} onClick={() => setPage((value) => value - 1)} className="h-8 w-8 rounded-lg border border-slate-200 disabled:opacity-40">‹</button>
+            <button disabled={currentPage === 1} onClick={() => setPage((value) => value - 1)} className="h-8 w-8 rounded-lg border border-slate-200 dark:border-slate-700 dark:text-slate-300 disabled:opacity-40">‹</button>
             {Array.from({ length: pageCount }, (_, index) => index + 1).slice(0, 5).map((number) => (
-              <button key={number} onClick={() => setPage(number)} className={`h-8 min-w-8 rounded-lg px-2 font-semibold ${number === currentPage ? "bg-teal-700 text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-50"}`}>
+              <button key={number} onClick={() => setPage(number)} className={`h-8 min-w-8 rounded-lg px-2 font-semibold ${number === currentPage ? "bg-teal-700 text-white" : "border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"}`}>
                 {number}
               </button>
             ))}
-            <button disabled={currentPage === pageCount} onClick={() => setPage((value) => value + 1)} className="h-8 w-8 rounded-lg border border-slate-200 disabled:opacity-40">›</button>
+            <button disabled={currentPage === pageCount} onClick={() => setPage((value) => value + 1)} className="h-8 w-8 rounded-lg border border-slate-200 dark:border-slate-700 dark:text-slate-300 disabled:opacity-40">›</button>
           </div>
         </div>
       </div>

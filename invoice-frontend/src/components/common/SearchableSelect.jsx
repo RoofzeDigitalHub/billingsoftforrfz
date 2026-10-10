@@ -68,15 +68,15 @@ function SearchableSelect({ options, value, onChange, placeholder, disabled = fa
           placeholder={disabled ? placeholder : value || placeholder || "Search…"}
           disabled={disabled}
           autoComplete="off"
-          className="h-10 w-full rounded-lg border border-slate-300 bg-white pl-9 pr-9 text-sm outline-none transition focus:border-teal-500 focus:ring-2 focus:ring-teal-100 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400"
+          className="h-10 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 pl-9 pr-9 text-sm text-slate-800 dark:text-slate-100 outline-none transition placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-teal-500 focus:ring-2 focus:ring-teal-100 dark:focus:ring-teal-900/40 disabled:cursor-not-allowed disabled:border-slate-200 dark:disabled:border-slate-800 disabled:bg-slate-100 dark:disabled:bg-slate-800/50 disabled:text-slate-400"
         />
-        <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-400">
+        <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-400 dark:text-slate-500">
           <IconChevronDown className="h-4 w-4" />
         </span>
       </div>
 
       {open && !disabled && (
-        <div className="absolute z-20 mt-1 max-h-64 w-full overflow-auto rounded-lg border border-slate-200 bg-white shadow-lg">
+        <div className="absolute z-20 mt-1 max-h-64 w-full overflow-auto rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl">
           {matches.length ? (
             matches.map((opt) => (
               <button
@@ -84,15 +84,17 @@ function SearchableSelect({ options, value, onChange, placeholder, disabled = fa
                 key={opt}
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => handleSelect(opt)}
-                className={`block w-full px-3 py-2 text-left text-sm hover:bg-teal-50 ${
-                  opt === value ? "bg-teal-50 font-semibold text-teal-700" : "text-slate-700"
+                className={`block w-full px-3 py-2 text-left text-sm transition ${
+                  opt === value
+                    ? "bg-teal-50 dark:bg-teal-950/60 font-semibold text-teal-700 dark:text-teal-300"
+                    : "text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
                 }`}
               >
                 {opt}
               </button>
             ))
           ) : (
-            <div className="px-3 py-3 text-xs text-slate-400">{emptyMessage || "No matches found."}</div>
+            <div className="px-3 py-3 text-xs text-slate-400 dark:text-slate-500">{emptyMessage || "No matches found."}</div>
           )}
         </div>
       )}

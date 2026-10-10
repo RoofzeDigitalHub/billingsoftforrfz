@@ -63,16 +63,16 @@ function ClientSelect({ clients, value, onChange, onSelectClient, loading, place
           placeholder={loading ? "Loading clients…" : placeholder || "Search existing client or type a new name…"}
           disabled={disabled}
           readOnly={disabled}
-          className="h-10 w-full rounded-lg border border-slate-300 pl-9 pr-9 text-sm outline-none transition focus:border-teal-500 focus:ring-2 focus:ring-teal-100 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400"
+          className="h-10 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 pl-9 pr-9 text-sm text-slate-800 dark:text-slate-100 outline-none transition placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-teal-500 focus:ring-2 focus:ring-teal-100 dark:focus:ring-teal-900/40 disabled:cursor-not-allowed disabled:border-slate-200 dark:disabled:border-slate-800 disabled:bg-slate-100 dark:disabled:bg-slate-800/50 disabled:text-slate-400"
           autoComplete="off"
         />
-        <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-400">
+        <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-slate-400 dark:text-slate-500">
           <IconChevronDown className="h-4 w-4" />
         </span>
       </div>
 
       {open && !loading && (
-        <div className="absolute z-20 mt-1 max-h-64 w-full overflow-auto rounded-lg border border-slate-200 bg-white shadow-lg">
+        <div className="absolute z-20 mt-1 max-h-64 w-full overflow-auto rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl">
           {matches.length ? (
             matches.slice(0, 30).map((client) => (
               <button
@@ -80,16 +80,16 @@ function ClientSelect({ clients, value, onChange, onSelectClient, loading, place
                 key={client.id}
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => handleSelect(client)}
-                className="flex w-full flex-col items-start gap-0.5 border-b border-slate-50 px-3 py-2 text-left last:border-0 hover:bg-teal-50"
+                className="flex w-full flex-col items-start gap-0.5 border-b border-slate-50 dark:border-slate-800 px-3 py-2 text-left last:border-0 hover:bg-teal-50/70 dark:hover:bg-slate-800 transition"
               >
-                <span className="text-sm font-semibold text-slate-800">{client.name}</span>
-                <span className="text-xs text-slate-400">
+                <span className="text-sm font-semibold text-slate-800 dark:text-white">{client.name}</span>
+                <span className="text-xs text-slate-400 dark:text-slate-400">
                   {[client.contact, client.phone, client.city].filter(Boolean).join(" · ") || "No contact info on file"}
                 </span>
               </button>
             ))
           ) : (
-            <div className="px-3 py-3 text-xs text-slate-400">
+            <div className="px-3 py-3 text-xs text-slate-400 dark:text-slate-500">
               No matching client — this will be treated as a new client name.
             </div>
           )}

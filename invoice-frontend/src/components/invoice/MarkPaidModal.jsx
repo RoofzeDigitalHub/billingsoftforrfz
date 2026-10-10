@@ -10,10 +10,10 @@ const todayISO = () => {
 };
 
 const inputClass = (hasError) =>
-  `w-full rounded-xl border px-3 py-2.5 text-sm outline-none focus:ring-2 ${
+  `w-full rounded-xl border bg-white dark:bg-slate-800 px-3 py-2.5 text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none transition focus:ring-2 ${
     hasError
-      ? "border-red-300 focus:border-red-400 focus:ring-red-100"
-      : "border-slate-300 focus:border-teal-500 focus:ring-teal-100"
+      ? "border-red-300 dark:border-red-500 focus:border-red-400 focus:ring-red-100 dark:focus:ring-red-900/40"
+      : "border-slate-300 dark:border-slate-700 focus:border-teal-500 focus:ring-teal-100 dark:focus:ring-teal-900/40"
   }`;
 
 /**
@@ -122,7 +122,7 @@ function MarkPaidModal({ open, invoiceNumber, totalAmount, submitting, serverErr
     });
   };
 
-  const labelClass = "mb-1.5 block text-xs font-semibold text-slate-600";
+  const labelClass = "mb-1.5 block text-xs font-semibold text-slate-600 dark:text-slate-300";
   const errorText = (name) =>
     errors[name] ? <p className="mt-1 text-xs font-medium text-red-500">{errors[name]}</p> : null;
 
@@ -130,7 +130,7 @@ function MarkPaidModal({ open, invoiceNumber, totalAmount, submitting, serverErr
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 print:hidden overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 print:hidden overflow-y-auto"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget && !submitting) onClose();
       }}
@@ -141,32 +141,32 @@ function MarkPaidModal({ open, invoiceNumber, totalAmount, submitting, serverErr
       <form
         onSubmit={handleSubmit}
         noValidate
-        className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl my-8"
+        className="w-full max-w-lg rounded-2xl bg-white dark:bg-slate-900 border dark:border-slate-800 p-6 shadow-2xl my-8"
       >
         <div className="mb-4">
           <div className="flex items-center justify-between">
-            <h2 id="mark-paid-title" className="text-lg font-bold text-slate-900">
+            <h2 id="mark-paid-title" className="text-lg font-bold text-slate-900 dark:text-white">
               Mark as Paid &amp; Generate Invoice No.
             </h2>
             <button
               type="button"
               onClick={onClose}
               disabled={submitting}
-              className="text-slate-400 hover:text-slate-600 text-lg leading-none"
+              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg leading-none transition"
             >
               &times;
             </button>
           </div>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
             Enter payment confirmation details{invoiceNumber ? ` for ${invoiceNumber}` : ""}.
           </p>
         </div>
 
         {/* Notice about invoice number generation */}
         {isTempNumber && (
-          <div className="mb-4 rounded-xl border border-teal-200 bg-teal-50/70 p-3 text-xs text-teal-800">
+          <div className="mb-4 rounded-xl border border-teal-200 dark:border-teal-900/50 bg-teal-50/70 dark:bg-teal-950/40 p-3 text-xs text-teal-800 dark:text-teal-300">
             <div className="flex items-start gap-2">
-              <span className="font-bold text-teal-600">⚡ Invoice Number:</span>
+              <span className="font-bold text-teal-600 dark:text-teal-400">⚡ Invoice Number:</span>
               <div>
                 This invoice currently has temporary number <strong>{invoiceNumber}</strong>. Upon confirming payment,
                 the official sequential invoice number will be generated automatically.
@@ -263,10 +263,10 @@ function MarkPaidModal({ open, invoiceNumber, totalAmount, submitting, serverErr
             {!screenshotPreview ? (
               <label
                 htmlFor="pay-screenshot-file"
-                className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 p-4 text-center cursor-pointer transition hover:border-teal-500 hover:bg-slate-50"
+                className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700 p-4 text-center cursor-pointer transition hover:border-teal-500 hover:bg-slate-50 dark:hover:bg-slate-800/60"
               >
                 <svg
-                  className="h-8 w-8 text-slate-400 mb-1"
+                  className="h-8 w-8 text-slate-400 dark:text-slate-500 mb-1"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -278,28 +278,28 @@ function MarkPaidModal({ open, invoiceNumber, totalAmount, submitting, serverErr
                     d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                   />
                 </svg>
-                <span className="text-xs font-semibold text-teal-700">
+                <span className="text-xs font-semibold text-teal-700 dark:text-teal-300">
                   Click to upload payment screenshot
                 </span>
-                <span className="text-[11px] text-slate-400 mt-0.5">
+                <span className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
                   PNG, JPG, JPEG or WEBP (Max 15MB)
                 </span>
               </label>
             ) : (
-              <div className="relative rounded-xl border border-slate-200 bg-slate-50 p-2 flex items-center gap-3">
+              <div className="relative rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-2 flex items-center gap-3">
                 <img
                   src={screenshotPreview}
                   alt="Payment screenshot preview"
-                  className="h-16 w-16 object-cover rounded-lg border border-slate-200 shrink-0"
+                  className="h-16 w-16 object-cover rounded-lg border border-slate-200 dark:border-slate-700 shrink-0"
                 />
                 <div className="min-w-0 flex-1 text-xs">
-                  <div className="font-semibold text-slate-800 truncate">{screenshotName || "Payment Screenshot"}</div>
-                  <div className="text-[11px] text-teal-600 font-medium">Ready to upload</div>
+                  <div className="font-semibold text-slate-800 dark:text-white truncate">{screenshotName || "Payment Screenshot"}</div>
+                  <div className="text-[11px] text-teal-600 dark:text-teal-400 font-medium">Ready to upload</div>
                 </div>
                 <button
                   type="button"
                   onClick={handleRemoveScreenshot}
-                  className="rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-100"
+                  className="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 px-2.5 py-1 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/60 transition"
                 >
                   Remove
                 </button>
@@ -310,7 +310,7 @@ function MarkPaidModal({ open, invoiceNumber, totalAmount, submitting, serverErr
         </div>
 
         {serverError && (
-          <div className="mt-4 rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-xs font-medium text-red-600">
+          <div className="mt-4 rounded-xl border border-red-100 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400">
             {serverError}
           </div>
         )}
@@ -320,14 +320,14 @@ function MarkPaidModal({ open, invoiceNumber, totalAmount, submitting, serverErr
             type="button"
             onClick={onClose}
             disabled={submitting}
-            className="rounded-xl border border-slate-300 px-4 py-2 text-xs font-semibold hover:bg-slate-50 disabled:opacity-60"
+            className="rounded-xl border border-slate-300 dark:border-slate-700 dark:text-slate-300 px-4 py-2 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-60 transition"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={submitting}
-            className="rounded-xl bg-teal-600 px-5 py-2 text-xs font-semibold text-white hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-60 shadow-sm"
+            className="rounded-xl bg-teal-600 px-5 py-2 text-xs font-semibold text-white hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-60 shadow-sm transition"
           >
             {submitting ? "Processing…" : "Confirm Payment & Generate Invoice No."}
           </button>

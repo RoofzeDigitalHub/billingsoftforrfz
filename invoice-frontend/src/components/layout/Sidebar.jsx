@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getSession, logout } from "../../utils/auth";
+import { usePWAInstall } from "../../utils/pwa";
 import {
   IconHome,
   IconInvoice,
@@ -10,12 +11,19 @@ import {
   IconChevronLeft,
   IconChevronRight,
   IconLogout,
+  IconReceipt,
+  IconChartBar,
+  IconTrendingUp,
+  IconInstall,
 } from "../icons/Icons";
 
 const NAV_ITEMS = [
   { to: "/dashboard", label: "Dashboard", icon: IconHome },
   { to: "/dashboard/invoices/Create", label: "Create Invoice", icon: IconInvoice },
   { to: "/dashboard/invoices", label: "All Invoices", icon: IconList },
+  { to: "/dashboard/expenses", label: "Expenses & Cash", icon: IconReceipt },
+  { to: "/dashboard/reports/income-expense", label: "Income & Expense", icon: IconTrendingUp },
+  { to: "/dashboard/reports/client-ledger", label: "Client Ledger", icon: IconChartBar },
   { to: "/dashboard/proposals/create", label: "Create Proposal", icon: IconPlus },
   { to: "/dashboard/proposals", label: "All Proposals", icon: IconFileText },
   { to: "/dashboard/clients", label: "Clients", icon: IconUsers },
@@ -38,6 +46,7 @@ function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }) {
   const navigate = useNavigate();
   const session = getSession();
   const activePath = getActiveNavPath(location.pathname);
+  const { isStandalone, installApp } = usePWAInstall();
 
   const handleLogout = () => {
     logout();
@@ -123,6 +132,16 @@ function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }) {
         {isCollapsed ? (
           /* Collapsed mini profile */
           <div className="flex flex-col items-center gap-2">
+            {!isStandalone && (
+              <button
+                onClick={installApp}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-purple-300 hover:bg-purple-500/20 transition"
+                title="Install App"
+                aria-label="Install App"
+              >
+                <IconInstall className="h-4 w-4" />
+              </button>
+            )}
             <div
               className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-600 text-xs font-bold text-white shadow-sm"
               title={`${session?.name || "Admin"} (${session?.role || "User"})`}
@@ -141,6 +160,15 @@ function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }) {
         ) : (
           /* Expanded full profile */
           <div>
+            {!isStandalone && (
+              <button
+                onClick={installApp}
+                className="mb-2.5 flex w-full items-center gap-2 rounded-xl border border-purple-500/30 bg-purple-500/10 px-3 py-2 text-left text-xs font-semibold text-purple-300 hover:bg-purple-500/20 transition"
+              >
+                <IconInstall className="h-4 w-4 shrink-0 text-purple-400" />
+                <span>Install App</span>
+              </button>
+            )}
             <div className="mb-2 flex items-center gap-3 px-1 py-1">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-600 text-xs font-bold text-white shadow-sm">
                 {(session?.name || "A").slice(0, 1).toUpperCase()}
@@ -225,6 +253,19 @@ function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }) {
             </nav>
 
             <div className="border-t border-white/10 p-3">
+              {!isStandalone && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    installApp();
+                    onClose?.();
+                  }}
+                  className="mb-2.5 flex w-full items-center gap-2 rounded-xl border border-purple-500/30 bg-purple-500/10 px-3 py-2 text-left text-xs font-semibold text-purple-300 hover:bg-purple-500/20 transition"
+                >
+                  <IconInstall className="h-4 w-4 shrink-0 text-purple-400" />
+                  <span>Install App</span>
+                </button>
+              )}
               <div className="mb-2 flex items-center gap-3 px-2 py-1">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-600 text-xs font-bold">
                   {(session?.name || "A").slice(0, 1).toUpperCase()}
