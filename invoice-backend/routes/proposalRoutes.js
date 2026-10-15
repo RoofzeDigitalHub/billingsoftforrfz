@@ -9,8 +9,11 @@ router.get('/next-number', controller.nextNumber); // must stay above '/:id'
 router.get('/:id', controller.getById);
 router.post('/', controller.create);
 router.put('/:id', controller.update);
+router.post('/:id/update', controller.update);
 router.post('/:id/finalize', controller.finalize);
 router.patch('/:id/status', controller.updateStatus);
+router.post('/:id/status', controller.updateStatus);
 router.delete('/:id', controller.remove);
+router.post('/:id/delete', controller.remove);
 
 module.exports = router;

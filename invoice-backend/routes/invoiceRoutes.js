@@ -10,6 +10,8 @@ router.get('/client-milestones', controller.getClientMilestones); // must stay a
 router.get('/:id', controller.getById);
 router.post('/', controller.create);
 router.patch('/:id/status', controller.updateStatus);
+router.post('/:id/status', controller.updateStatus);
 router.patch('/:id', controller.updateDetails);
+router.post('/:id', controller.updateDetails);
 
 module.exports = router;

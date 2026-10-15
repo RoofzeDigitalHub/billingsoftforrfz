@@ -38,11 +38,27 @@ export async function createExpense(payload) {
 }
 
 export async function updateExpense(id, payload) {
-  const res = await http.put(`/expenses/${encodeURIComponent(id)}`, payload);
-  return res.data;
+  try {
+    const res = await http.post(`/expenses/${encodeURIComponent(id)}/update`, payload);
+    return res.data;
+  } catch (err) {
+    if (err.status === 404 || err.status === 405) {
+      const res = await http.put(`/expenses/${encodeURIComponent(id)}`, payload);
+      return res.data;
+    }
+    throw err;
+  }
 }
 
 export async function deleteExpense(id) {
-  const res = await http.delete(`/expenses/${encodeURIComponent(id)}`);
-  return res;
+  try {
+    const res = await http.post(`/expenses/${encodeURIComponent(id)}/delete`);
+    return res;
+  } catch (err) {
+    if (err.status === 404 || err.status === 405) {
+      const res = await http.delete(`/expenses/${encodeURIComponent(id)}`);
+      return res;
+    }
+    throw err;
+  }
 }

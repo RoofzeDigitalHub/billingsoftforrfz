@@ -112,12 +112,28 @@ export async function createBillingLocation(form) {
 }
 
 export async function updateBillingLocation(id, form) {
-  const res = await http.put(`/billing-locations/${id}`, toApi(form));
-  return fromApi(res.data);
+  try {
+    const res = await http.post(`/billing-locations/${id}/update`, toApi(form));
+    return fromApi(res.data);
+  } catch (err) {
+    if (err.status === 404 || err.status === 405) {
+      const res = await http.put(`/billing-locations/${id}`, toApi(form));
+      return fromApi(res.data);
+    }
+    throw err;
+  }
 }
 
 export async function deleteBillingLocation(id) {
-  await http.delete(`/billing-locations/${id}`);
+  try {
+    await http.post(`/billing-locations/${id}/delete`);
+  } catch (err) {
+    if (err.status === 404 || err.status === 405) {
+      await http.delete(`/billing-locations/${id}`);
+      return;
+    }
+    throw err;
+  }
 }
 
 // Shared hook for any page that just needs to read the list once

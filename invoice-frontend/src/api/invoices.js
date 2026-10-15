@@ -68,10 +68,11 @@ export async function createInvoice(payload) {
  *  - "PAID": pass { payment_mode, payment_reference, payment_date, amount_paid }.
  */
 export async function updateInvoiceStatus(id, paymentStatus, paymentDetails = {}) {
-  const res = await http.patch(`/invoices/${encodeURIComponent(id)}/status`, {
+  const payload = {
     payment_status: paymentStatus,
     ...(paymentStatus === "PAID" ? paymentDetails : {}),
-  });
+  };
+  const res = await http.post(`/invoices/${encodeURIComponent(id)}/status`, payload);
   return fromApi(res.data);
 }
 
@@ -91,7 +92,7 @@ export async function getClientMilestones({ clientId, clientName } = {}) {
  * Strictly protects cost and invoice number from modification.
  */
 export async function updateInvoiceDetails(id, details) {
-  const res = await http.patch(`/invoices/${encodeURIComponent(id)}`, details);
+  const res = await http.post(`/invoices/${encodeURIComponent(id)}`, details);
   return fromApi(res.data);
 }
 

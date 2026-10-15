@@ -123,8 +123,16 @@ export async function createClient(form) {
 }
 
 export async function updateClient(id, form) {
-  const res = await http.put(`/clients/${id}`, toApi(form));
-  return fromApi(res.data);
+  try {
+    const res = await http.post(`/clients/${id}/update`, toApi(form));
+    return fromApi(res.data);
+  } catch (err) {
+    if (err.status === 404 || err.status === 405) {
+      const res = await http.put(`/clients/${id}`, toApi(form));
+      return fromApi(res.data);
+    }
+    throw err;
+  }
 }
 
 /**
@@ -132,10 +140,26 @@ export async function updateClient(id, form) {
  * receives, so nothing else on the client is touched.
  */
 export async function updateClientStatus(id, isActive) {
-  const res = await http.put(`/clients/${id}`, { is_active: isActive ? 1 : 0 });
-  return fromApi(res.data);
+  try {
+    const res = await http.post(`/clients/${id}/update`, { is_active: isActive ? 1 : 0 });
+    return fromApi(res.data);
+  } catch (err) {
+    if (err.status === 404 || err.status === 405) {
+      const res = await http.put(`/clients/${id}`, { is_active: isActive ? 1 : 0 });
+      return fromApi(res.data);
+    }
+    throw err;
+  }
 }
 
 export async function deleteClient(id) {
-  await http.delete(`/clients/${id}`);
+  try {
+    await http.post(`/clients/${id}/delete`);
+  } catch (err) {
+    if (err.status === 404 || err.status === 405) {
+      await http.delete(`/clients/${id}`);
+      return;
+    }
+    throw err;
+  }
 }

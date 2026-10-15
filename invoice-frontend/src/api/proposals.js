@@ -46,8 +46,16 @@ export async function finalizeProposal(id, payload) {
 }
 
 export async function reopenProposal(id) {
-  const res = await http.patch(`/proposals/${encodeURIComponent(id)}/status`, { status: "DRAFT" });
-  return res.data;
+  try {
+    const res = await http.post(`/proposals/${encodeURIComponent(id)}/status`, { status: "DRAFT" });
+    return res.data;
+  } catch (err) {
+    if (err.status === 404 || err.status === 405) {
+      const res = await http.patch(`/proposals/${encodeURIComponent(id)}/status`, { status: "DRAFT" });
+      return res.data;
+    }
+    throw err;
+  }
 }
 
 export async function deleteProposal(id) {
